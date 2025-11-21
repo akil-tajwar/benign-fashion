@@ -10,7 +10,7 @@ export async function createCategory(token: string, data: CreateCategoryType) {
       'Content-Type': 'application/json',
       Authorization: `${token}`,
     },
-    body: data, // Pass object directly
+    body: data,
   })
 }
 
@@ -23,5 +23,22 @@ export async function fetchCategories(token: string) {
       'Content-Type': 'application/json',
       Authorization: `${token}`,
     },
+  })
+}
+
+// Update Category API
+export async function updateCategory(
+  token: string,
+  categoryId: number,
+  data: Partial<GetCategoryType>
+) {
+  return fetchApi<GetCategoryType>({
+    url: `api/categories/update/${categoryId}`,
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+    body: data,
   })
 }

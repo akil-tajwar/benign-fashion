@@ -59,7 +59,7 @@ export const userModel = mysqlTable("users", {
 });
 
 // ================= CATEGORIES =================
-export const categories = mysqlTable("categories", {
+export const categoriesModel = mysqlTable("categories", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
   categoryType: mysqlEnum("category_type", ["men", "kids"]),
@@ -67,68 +67,64 @@ export const categories = mysqlTable("categories", {
 });
 
 // ================= PRODUCTS =================
-export const products = mysqlTable("products", {
+export const productsModel = mysqlTable("products", {
   id: int("id").primaryKey().autoincrement(),
-  productCode: int("product_code").unique(),
+  productCode: varchar("product_code", { length: 20 }).unique(),
   name: varchar("name", { length: 150 }).notNull(),
   description: text("description"),
-  photos: json("photos").$type<string[]>().notNull(),
   price: int("price").notNull(),
   discount: int("discount").notNull().default(0),
   categoryId: int("category_id")
     .notNull()
-    .references(() => categories.id, { onDelete: "cascade" }),
+    .references(() => categoriesModel.id, { onDelete: "cascade" }),
+  subCategoryId: int("sub_category_id")
+    .notNull()
+    .references(() => categoriesModel.id, { onDelete: "cascade" }),
   isAvailable: boolean("is_available").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// ================= CARTS =================
-export const carts = mysqlTable("carts", {
+// ================= PHOTOS =================
+export const photosModel = mysqlTable("photos", {
   id: int("id").primaryKey().autoincrement(),
   productId: int("product_id")
     .notNull()
-    .references(() => products.id, { onDelete: "cascade" }),
+    .references(() => productsModel.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+});
+
+// ================= CARTS =================
+export const cartsModel = mysqlTable("carts", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id")
+    .notNull()
+    .references(() => productsModel.id, { onDelete: "cascade" }),
+  productCode: varchar("product_code", { length: 20 }).unique(),
   userId: int("user_id")
     .notNull()
     .references(() => userModel.userId, { onDelete: "cascade" }),
-  quantity: int("quantity").notNull().default(1), // ✅ added quantity
+  size: mysqlEnum("size", ["M", "L", "XL", "XXL"]).notNull(),
+  quantity: int("quantity").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // ================= ORDERS =================
-export const orders = mysqlTable("orders", {
+export const ordersModel = mysqlTable("orders", {
   id: int("id").primaryKey().autoincrement(),
   userId: int("user_id")
     .notNull()
     .references(() => userModel.userId, { onDelete: "cascade" }),
   productId: int("product_id")
     .notNull()
-    .references(() => products.id, { onDelete: "cascade" }),
-  quantity: int("quantity").notNull(),
-  status: mysqlEnum("status", [
-    "pending",
-    "paid",
-    "delivered",
-  ]).default("pending"),
-  totalAmount: int("total_amount").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// ================= PAYMENTS =================
-export const payments = mysqlTable("payments", {
-  id: int("id").primaryKey().autoincrement(),
-  userId: int("user_id")
-    .notNull()
-    .references(() => userModel.userId, { onDelete: "cascade" }),
-  orderId: int("order_id")
-    .notNull()
-    .references(() => orders.id, { onDelete: "cascade" }),
-  method: mysqlEnum("method", ["cash", "bkash", "nagad", "rocket"]).notNull(),
-  totalAmount: int("total_amount").notNull(),
-  transactionId: varchar("transaction_id", { length: 255 }),
-  status: mysqlEnum("status", ["pending", "completed", "failed"]).default(
+    .references(() => productsModel.id, { onDelete: "cascade" }),
+  size: mysqlEnum("size", ["M", "L", "XL", "XXL"]).notNull(),
+  quantity: int("quantity").notNull().default(1),
+  status: mysqlEnum("status", ["pending", "paid", "delivered"]).default(
     "pending"
   ),
+  method: mysqlEnum("method", ["cash", "bkash", "nagad", "rocket"]).notNull(),
+  transactionId: varchar("transaction_id", { length: 255 }),
+  totalAmount: int("total_amount").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -139,9 +135,8 @@ export const userRelations = relations(userModel, ({ one, many }) => ({
     fields: [userModel.roleId],
     references: [roleModel.roleId],
   }),
-  carts: many(carts),
-  orders: many(orders),
-  payments: many(payments),
+  carts: many(cartsModel),
+  orders: many(ordersModel),
   userRoles: many(userRolesModel),
 }));
 
@@ -181,50 +176,51 @@ export const userRolesRelations = relations(userRolesModel, ({ one }) => ({
 }));
 
 // Product relations
-export const productRelations = relations(products, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [products.categoryId],
-    references: [categories.id],
+export const productRelations = relations(productsModel, ({ one, many }) => ({
+  category: one(categoriesModel, {
+    fields: [productsModel.categoryId],
+    references: [categoriesModel.id],
   }),
-  carts: many(carts),
-  orders: many(orders),
+  photos: many(photosModel),
 }));
 
-export const categoryRelations = relations(categories, ({ many }) => ({
-  products: many(products),
+export const photosRelations = relations(photosModel, ({ one }) => ({
+  product: one(productsModel, {
+    fields: [photosModel.productId],
+    references: [productsModel.id],
+  }),
 }));
 
-export const cartRelations = relations(carts, ({ one }) => ({
-  product: one(products, {
-    fields: [carts.productId],
-    references: [products.id],
+export const categoryRelations = relations(categoriesModel, ({ many }) => ({
+  products: many(productsModel),
+}));
+
+export const cartRelations = relations(cartsModel, ({ one }) => ({
+  product: one(productsModel, {
+    fields: [cartsModel.productId],
+    references: [productsModel.id],
   }),
   user: one(userModel, {
-    fields: [carts.userId],
+    fields: [cartsModel.userId],
     references: [userModel.userId],
   }),
 }));
 
-export const orderRelations = relations(orders, ({ one, many }) => ({
+export const orderRelations = relations(ordersModel, ({ one }) => ({
   user: one(userModel, {
-    fields: [orders.userId],
+    fields: [ordersModel.userId],
     references: [userModel.userId],
   }),
-  product: one(products, {
-    fields: [orders.productId],
-    references: [products.id],
+  product: one(productsModel, {
+    fields: [ordersModel.productId],
+    references: [productsModel.id],
   }),
-  payments: many(payments),
 }));
 
-export const paymentRelations = relations(payments, ({ one }) => ({
-  user: one(userModel, {
-    fields: [payments.userId],
-    references: [userModel.userId],
-  }),
-  order: one(orders, {
-    fields: [payments.orderId],
-    references: [orders.id],
+export const photoRelations = relations(photosModel, ({ one }) => ({
+  product: one(productsModel, {
+    fields: [photosModel.productId],
+    references: [productsModel.id],
   }),
 }));
 
@@ -239,13 +235,11 @@ export type UserRole = typeof userRolesModel.$inferSelect;
 export type NewUserRole = typeof userRolesModel.$inferInsert;
 export type RolePermission = typeof rolePermissionsModel.$inferSelect;
 export type NewRolePermission = typeof rolePermissionsModel.$inferInsert;
-export type Category = typeof categories.$inferSelect;
-export type NewCategory = typeof categories.$inferInsert;
-export type Product = typeof products.$inferSelect;
-export type NewProduct = typeof products.$inferInsert;
-export type Cart = typeof carts.$inferSelect;
-export type NewCart = typeof carts.$inferInsert;
-export type Order = typeof orders.$inferSelect;
-export type NewOrder = typeof orders.$inferInsert;
-export type Payment = typeof payments.$inferSelect;
-export type NewPayment = typeof payments.$inferInsert;
+export type Category = typeof categoriesModel.$inferSelect;
+export type NewCategory = typeof categoriesModel.$inferInsert;
+export type Product = typeof productsModel.$inferSelect;
+export type NewProduct = typeof productsModel.$inferInsert;
+export type Cart = typeof cartsModel.$inferSelect;
+export type NewCart = typeof cartsModel.$inferInsert;
+export type Order = typeof ordersModel.$inferSelect;
+export type NewOrder = typeof ordersModel.$inferInsert;

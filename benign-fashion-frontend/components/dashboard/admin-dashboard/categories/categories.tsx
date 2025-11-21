@@ -14,17 +14,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { DialogFooter } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import type { CreateCategoryType, GetCategoryType } from '@/utils/type'
-import { createCategory, fetchCategories } from '@/utils/api'
+import { createCategory, fetchCategories, updateCategory } from '@/utils/api'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
@@ -48,6 +41,10 @@ const Categories = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+
+  const [editingCategory, setEditingCategory] =
+    useState<GetCategoryType | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // State for form data
   const [formData, setFormData] = useState<CreateCategoryType>({
@@ -105,7 +102,18 @@ const Categories = () => {
       categoryType: 'men',
       isCategoryHead: false,
     })
+    setEditingCategory(null)
     setIsPopupOpen(false)
+  }, [])
+
+  const handleEdit = useCallback((category: GetCategoryType) => {
+    setEditingCategory(category)
+    setFormData({
+      name: category.name,
+      categoryType: category.categoryType,
+      isCategoryHead: category.isCategoryHead,
+    })
+    setIsPopupOpen(true)
   }, [])
 
   // Handle form submission
@@ -114,13 +122,20 @@ const Categories = () => {
       e.preventDefault()
 
       try {
+        setIsSubmitting(true)
         const payload: CreateCategoryType = {
           name: formData.name,
           categoryType: formData.categoryType,
           isCategoryHead: formData.isCategoryHead,
         }
 
-        await createCategory(token, payload)
+        if (editingCategory) {
+          if (editingCategory?.id !== undefined) {
+            await updateCategory(token, editingCategory.id, payload)
+          }
+        } else {
+          await createCategory(token, payload)
+        }
 
         // Refresh the categories list
         fetchCategoriesData()
@@ -128,10 +143,12 @@ const Categories = () => {
         // Reset form and close dialog
         resetForm()
       } catch (error) {
-        console.error('Error creating category:', error)
+        console.error('Error saving category:', error)
+      } finally {
+        setIsSubmitting(false)
       }
     },
-    [formData, token, fetchCategoriesData, resetForm]
+    [formData, token, fetchCategoriesData, resetForm, editingCategory]
   )
 
   return (
@@ -146,7 +163,15 @@ const Categories = () => {
         </div>
         <Button
           className="bg-blue-400 hover:bg-blue-500 text-black"
-          onClick={() => setIsPopupOpen(true)}
+          onClick={() => {
+            setEditingCategory(null)
+            setFormData({
+              name: '',
+              categoryType: 'men',
+              isCategoryHead: false,
+            })
+            setIsPopupOpen(true)
+          }}
         >
           Add Category
         </Button>
@@ -161,6 +186,7 @@ const Categories = () => {
               <TableHead>Name</TableHead>
               <TableHead>Category Type</TableHead>
               <TableHead>Category Head</TableHead>
+              <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -193,6 +219,15 @@ const Categories = () => {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(category)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -204,7 +239,7 @@ const Categories = () => {
       <Popup
         isOpen={isPopupOpen}
         onClose={resetForm}
-        title="Add Category"
+        title={editingCategory ? 'Edit Category' : 'Add Category'}
         size="sm:max-w-lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -267,20 +302,16 @@ const Categories = () => {
             <Button type="button" variant="outline" onClick={resetForm}>
               Cancel
             </Button>
-            <Button type="submit">Save Category</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? 'Saving...'
+                : editingCategory
+                  ? 'Update Category'
+                  : 'Save Category'}
+            </Button>
           </DialogFooter>
         </form>
       </Popup>
-      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
-            <DialogDescription>
-              Create a new category for your system
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog> */}
     </div>
   )
 }

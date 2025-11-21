@@ -67,6 +67,34 @@ export const categorySchema = z.object({
 export type CreateCategoryType = z.infer<typeof categorySchema>;
 export type GetCategoryType = z.infer<typeof categorySchema>;
 
+export const productSchema = z.object({
+  product: z.object({
+    id: z.number().optional(),
+    productCode: z.string().max(20).optional(),
+    name: z.string().max(150),
+    description: z.string().nullable().optional(),
+    price: z.number(),
+    discount: z.number().default(0),
+    categoryId: z.number(),
+    subCategoryId: z.number(),
+    isAvailable: z.boolean().default(true),
+    createdAt: z.string().optional(),
+  }),
+
+  photoUrls: z.array(
+    z.object({
+      id: z.number().optional(),
+      productId: z.number().optional(),
+      url: z.string(),
+    })
+  ),
+});
+export type CreateProductType = z.infer<typeof productSchema>;
+export type GetProductType = z.infer<typeof productSchema> & {
+  categoryName: string;
+  subCategoryName: string;
+};
+
 
 // ✅ Define User type (based on your DB schema)
 export type Users = {
