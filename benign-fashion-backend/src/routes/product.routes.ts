@@ -10,11 +10,11 @@ import { upload } from "../middlewares/upload";
 
 const router = Router();
 
-// router.post("/create", createProductController);
-router.post("/create", upload.single("image"), createProductController);
+router.post("/create", upload.array("photoUrls", 10), createProductController);
 router.get("/get", getProductsController);
 router.get("/get/:id", getProductByIdController);
-router.put("/update/:id", updateProductController);
+router.put("/update/:id", upload.array("photoUrls", 10), updateProductController);
+
 router.delete("/delete/:id", deleteProductController);
 
 export default router;

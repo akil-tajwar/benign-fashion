@@ -1,5 +1,5 @@
-import { fetchApi } from '@/utils/http'
-import { CreateCategoryType, GetCategoryType } from '@/utils/type'
+import { fetchApi, fetchApiWithFile } from '@/utils/http'
+import { CreateCategoryType, CreateProductType, GetCategoryType, GetProductType } from '@/utils/type'
 
 // Create a new category
 export async function createCategory(token: string, data: CreateCategoryType) {
@@ -29,16 +29,52 @@ export async function fetchCategories(token: string) {
 // Update Category API
 export async function updateCategory(
   token: string,
-  categoryId: number,
+  id: number,
   data: Partial<GetCategoryType>
 ) {
   return fetchApi<GetCategoryType>({
-    url: `api/categories/update/${categoryId}`,
+    url: `api/categories/update/${id}`,
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `${token}`,
     },
     body: data,
+  })
+}
+
+// Create a new product
+export async function createProduct(token: string, formData: FormData) {
+  return fetchApiWithFile<CreateProductType>({
+    url: 'api/products/create',
+    method: 'POST',
+    headers: {
+      Authorization: `${token}`,
+    },
+    body: formData, // Pass FormData directly
+  })
+}
+
+//get all products api
+export async function fetchProducts(token: string) {
+  return fetchApi<GetProductType[]>({
+    url: 'api/products/get',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
+// Update product API
+export async function updateProduct(token: string, id: number, formData: FormData) {
+  return fetchApiWithFile<CreateProductType>({
+    url: `api/products/update/${id}`,
+    method: 'PUT',
+    headers: {
+      Authorization: `${token}`,
+    },
+    body: formData,
   })
 }

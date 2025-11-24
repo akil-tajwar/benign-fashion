@@ -33,37 +33,32 @@ export const productSchema = z.object({
 });
 
 // ======================== CREATE ========================
-
-export const createProductController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const createProductController = async (req: Request, res: Response) => {
   try {
-    const body = {
-      product: {
-        ...req.body.product,
-        price: Number(req.body.product.price),
-        discount: Number(req.body.product.discount),
-        categoryId: Number(req.body.product.categoryId),
-        subCategoryId: Number(req.body.product.subCategoryId),
-        isAvailable:
-          req.body.product.isAvailable === "true" ||
-          req.body.product.isAvailable === true,
-      },
-      photoUrls: req.body.photoUrls || [],
-    };
+    // Check if product field exists
+    if (!req.body.product) {
+      res.status(400).json({
+        error: "Product data is required",
+        receivedFields: Object.keys(req.body),
+        bodyContent: req.body,
+      });
+    }
 
-    const validated = productSchema.parse(body);
+    const product = JSON.parse(req.body.product);
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    const product = await createProduct(validated);
-
-    res.status(201).json({
-      status: "success",
-      data: product,
+    const createdProduct = await createProduct({
+      product,
+      photoUrls: files,
     });
+
+    res.json({ success: true, data: createdProduct });
   } catch (err) {
-    next(err);
+    console.error("Error details:", err);
+    if (err instanceof SyntaxError) {
+      res.status(400).json({ error: "Invalid JSON in product field" });
+    }
+    res.status(500).json({ error: "Something went wrong" });
   }
 };
 
@@ -121,7 +116,6 @@ export const updateProductController = async (
 };
 
 // ======================== DELETE ========================
-
 export const deleteProductController = async (
   req: Request,
   res: Response,
