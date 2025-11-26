@@ -4,15 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Heart, Share2, ShoppingCart, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { GetProduct } from '@/utils/type'
+import type { GetProductType } from '@/utils/type'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
-import { createCart, fetchCarts } from '@/api/cart-api'
+import { createCart } from '@/api/cart-api'
 import { useToast } from '@/hooks/use-toast'
 
 interface ProductDetailsProps {
-  product: GetProduct
+  product: GetProductType
 }
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
@@ -160,14 +159,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="text-gray-600 hover:text-red-500 h-12 w-12"
+                  className="text-gray-600 hover:text-red-500 h-12 w-12 bg-transparent"
                 >
                   <Heart className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="text-gray-600 hover:text-blue-500 h-12 w-12"
+                  className="text-gray-600 hover:text-blue-500 h-12 w-12 bg-transparent"
                 >
                   <Share2 className="w-4 h-4" />
                 </Button>

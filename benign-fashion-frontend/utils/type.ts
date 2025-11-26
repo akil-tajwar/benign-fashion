@@ -117,43 +117,6 @@ export type Users = {
   roleName?: string // Optional, if you want to include role name
 }
 
-
-// utils/type.ts
-export type GetProduct = {
-  id: number
-  name: string
-  description: string
-  url: string
-  price: number
-  stock: number
-  categoryId: number
-  isActive: boolean
-  categoryName: string
-  createdAt: string
-}
-
-// Define the type for creating a product
-export type CreateProduct = {
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  categoryId: number;
-  isActive: boolean;
-  url: string; // Image URL
-};
-
-//get cart item type
-// export type GetCart = {
-//   cartId: number
-//   productId: number
-//   name: string
-//   price: number
-//   quantity:number
-//    url: string
-//   createdAt: string
-// }
-
 export interface GetCart {
   cartId: number
   productId: number

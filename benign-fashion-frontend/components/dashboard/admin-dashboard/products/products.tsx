@@ -32,6 +32,7 @@ import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import { Popup } from '@/utils/popup'
 import { CustomCombobox } from '@/utils/custom-combobox'
+import Image from 'next/image'
 
 const Products = () => {
   useInitializeUser()
@@ -357,9 +358,11 @@ const Products = () => {
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     {product.photoUrls && product.photoUrls.length > 0 ? (
-                      <img
+                      <Image
                         src={product.photoUrls[0].url || '/placeholder.svg'}
                         alt={product.product.name}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 object-cover rounded"
                       />
                     ) : (

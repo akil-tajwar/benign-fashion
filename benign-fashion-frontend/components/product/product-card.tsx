@@ -4,32 +4,34 @@ import { Button } from '@/components/ui/button'
 import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { GetProduct } from '@/utils/type'
+import type { GetProductType } from '@/utils/type'
 
 interface ProductCardProps {
-  product: GetProduct
-  onAddToCart: (product: GetProduct) => void
-  onProductClick: (product: GetProduct) => void
+  product: GetProductType
+  onAddToCart: (product: GetProductType) => void
+  onProductClick: (product: GetProductType) => void
 }
 
 export default function ProductCard({
   product,
   onAddToCart,
+  onProductClick,
 }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const router = useRouter()
+
+  const firstImage =
+    product.photoUrls?.[0]?.url || '/diverse-products-still-life.png'
 
   const handleProductClick = () => {
-    router.push(`/product-details/${product.id}`)
+    onProductClick(product)
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden h-full flex flex-col">
       {/* Image Section with hover zoom */}
       <div
-        className="aspect-square relative overflow-hidden"
+        className="aspect-square relative overflow-hidden bg-gray-100"
         onClick={handleProductClick}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
@@ -37,37 +39,43 @@ export default function ProductCard({
         <Image
           height={300}
           width={300}
-          src={product.url || '/placeholder.svg'}
-          alt={product.name}
+          src={firstImage || '/placeholder.svg'}
+          alt={product.product.name}
           className={`w-full h-full object-cover transition-transform duration-700 ${
-            isImageHovered ? 'scale-100' : 'scale-110'
+            isImageHovered ? 'scale-110' : 'scale-100'
           }`}
         />
-       
       </div>
 
       {/* Content Section */}
-      <div className="p-4" onClick={handleProductClick}>
+      <div className="p-4 flex flex-col flex-1" onClick={handleProductClick}>
         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base">
-          {product.name}
+          {product.product.name}
         </h3>
 
+        <p className="text-xs text-gray-500 mb-3 line-clamp-1">
+          {product.categoryName}
+        </p>
 
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 mt-auto">
           <div className="flex items-center space-x-2">
             <span className="text-base md:text-lg font-bold text-gray-900">
-              ৳{product.price}
+              ৳{product.product.price}
             </span>
-          
+            {product.product.discount > 0 && (
+              <span className="text-xs text-red-500 line-through">
+                ৳{product.product.price + product.product.discount}
+              </span>
+            )}
           </div>
           <span
             className={`text-xs px-2 py-1 rounded ${
-              product.stock
+              product.product.isAvailable
                 ? 'bg-blue-100 text-blue-800'
                 : 'bg-red-100 text-red-800'
             }`}
           >
-            {product.stock ? 'In Stock' : 'Out of Stock'}({product.stock})
+            {product.product.isAvailable ? 'In Stock' : 'Out of Stock'}
           </span>
         </div>
 
@@ -78,11 +86,10 @@ export default function ProductCard({
           }}
           onMouseEnter={() => setIsButtonHovered(true)}
           onMouseLeave={() => setIsButtonHovered(false)}
-          disabled={!product.stock}
-          className="min-w-full text-white disabled:bg-gray-300 transition-all duration-500 text-sm md:text-base h-9 md:h-10 
-             bg-blue-500 hover:bg-blue-800"
+          disabled={!product.product.isAvailable}
+          className="w-full text-white disabled:bg-gray-300 transition-all duration-500 text-sm md:text-base h-9 md:h-10 bg-blue-600 hover:bg-blue-700"
         >
-          <div className="relative flex items-center justify-center overflow-hidden h-5 md:h-5">
+          <div className="relative flex items-center justify-center overflow-hidden h-5">
             {/* Text */}
             <div
               className={`transition-transform duration-500 ease-in-out ${
@@ -98,7 +105,7 @@ export default function ProductCard({
                 isButtonHovered ? 'translate-y-0' : 'translate-y-full'
               }`}
             >
-              <ShoppingCart className="w-4 h-3 md:w-6 md:h-6" />
+              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
             </div>
           </div>
         </Button>
@@ -106,6 +113,3 @@ export default function ProductCard({
     </div>
   )
 }
-
-
-

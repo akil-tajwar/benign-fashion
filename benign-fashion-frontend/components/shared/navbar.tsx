@@ -4,18 +4,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import {
-  Search,
-  User,
-  ShoppingCart,
-  ChevronDown,
-  ChevronRight,
-  LogOut,
-  LayoutDashboard,
-  Menu,
-  X,
-} from 'lucide-react'
+import { Search, User, ShoppingCart, X } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import {
@@ -28,7 +17,7 @@ import { fetchProducts } from '@/api/product-api'
 import { fetchCategories } from '@/api/categories-api'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
-import { GetCategoryType, GetProduct } from '@/utils/type'
+import type { GetCategoryType, GetProductType } from '@/utils/type'
 
 interface NavbarProps {
   searchQuery: string
@@ -62,7 +51,7 @@ export default function Navbar({
   onProductClick,
 }: NavbarProps) {
   const [categories, setCategories] = useState<GetCategoryType[]>([])
-  const [products, setProducts] = useState<GetProduct[]>([])
+  const [products, setProducts] = useState<GetProductType[]>([])
   const [token] = useAtom(tokenAtom)
 
   const [hoverMenu, setHoverMenu] = useState<string | null>(null)
@@ -112,13 +101,6 @@ export default function Navbar({
                 className="cursor-pointer hover:text-blue-600"
               >
                 Men
-              </p>
-              <p
-                onMouseEnter={() => setHoverMenu('Women')}
-                onMouseLeave={() => setHoverMenu(null)}
-                className="cursor-pointer hover:text-blue-600"
-              >
-                Women
               </p>
               <p
                 onMouseEnter={() => setHoverMenu('Kids')}
@@ -188,7 +170,7 @@ export default function Navbar({
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <button>
-                    <User className="text-gray-600 hover:text-blue-600 mt-2"/>
+                    <User className="text-gray-600 hover:text-blue-600 mt-2" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 p-2 bg-white border rounded-lg shadow-lg">
