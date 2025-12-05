@@ -41,8 +41,8 @@ export const createProduct = async (data: CreateProductWithFiles) => {
 
     // Save uploaded files and insert photo records
     if (data.photoUrls && data.photoUrls.length > 0) {
-      const baseUrl = process.env.API_BASE_URL || 'http://localhost:4000';
-      
+      const baseUrl = process.env.API_BASE_URL || "http://localhost:4000";
+
       const photosData = data.photoUrls.map((file) => ({
         productId,
         url: `${baseUrl}/uploads/${file.filename}`, // Full URL
@@ -88,7 +88,10 @@ export const getProducts = async () => {
       subCategoryName: subcat.name,
     })
     .from(productsModel)
-    .innerJoin(categoriesModel, eq(productsModel.categoryId, categoriesModel.id))
+    .innerJoin(
+      categoriesModel,
+      eq(productsModel.categoryId, categoriesModel.id)
+    )
     .innerJoin(subcat, eq(productsModel.subCategoryId, subcat.id))
     .execute();
 
@@ -114,10 +117,9 @@ export const getProducts = async () => {
       subCategoryId: p.subCategoryId,
       isAvailable: p.isAvailable,
       createdAt: p.createdAt,
+      categoryName: p.categoryName,
+      subCategoryName: p.subCategoryName,
     },
-
-    categoryName: p.categoryName,
-    subCategoryName: p.subCategoryName,
 
     photoUrls: photos
       .filter((photo) => photo.productId === p.id)
@@ -129,16 +131,71 @@ export const getProducts = async () => {
   }));
 };
 
-
-
 // ======================================================
 // GET PRODUCT BY ID
 // ======================================================
 export const getProductById = async (id: number) => {
-  return await db.query.productsModel.findFirst({
-    where: eq(productsModel.id, id),
-    with: { photos: true },
-  });
+  // Alias for subcategory
+  const subcat = alias(categoriesModel, "subcat");
+
+  // Fetch single product with category + subcategory
+  const product = await db
+    .select({
+      id: productsModel.id,
+      productCode: productsModel.productCode,
+      name: productsModel.name,
+      description: productsModel.description,
+      price: productsModel.price,
+      discount: productsModel.discount,
+      isAvailable: productsModel.isAvailable,
+      createdAt: productsModel.createdAt,
+
+      categoryId: productsModel.categoryId,
+      categoryName: categoriesModel.name,
+
+      subCategoryId: productsModel.subCategoryId,
+      subCategoryName: subcat.name,
+    })
+    .from(productsModel)
+    .innerJoin(
+      categoriesModel,
+      eq(productsModel.categoryId, categoriesModel.id)
+    )
+    .innerJoin(subcat, eq(productsModel.subCategoryId, subcat.id))
+    .where(eq(productsModel.id, id))
+    .then((res) => res[0]); // Only one result
+
+  if (!product) return null;
+
+  // Fetch photos for this product
+  const photos = await db
+    .select()
+    .from(photosModel)
+    .where(eq(photosModel.productId, id));
+
+  // Return in same structure as getProducts
+  return {
+    product: {
+      id: product.id,
+      productCode: product.productCode,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      discount: product.discount,
+      categoryId: product.categoryId,
+      subCategoryId: product.subCategoryId,
+      isAvailable: product.isAvailable,
+      createdAt: product.createdAt,
+      categoryName: product.categoryName,
+      subCategoryName: product.subCategoryName,
+    },
+
+    photoUrls: photos.map((photo) => ({
+      id: photo.id,
+      productId: photo.productId,
+      url: photo.url,
+    })),
+  };
 };
 
 // ======================================================

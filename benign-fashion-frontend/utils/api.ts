@@ -78,3 +78,15 @@ export async function updateProduct(token: string, id: number, formData: FormDat
     body: formData,
   })
 }
+
+//get product by id api
+export async function fetchProductById(token: string, id: number) {
+  return fetchApi<GetProductType>({
+    url: `api/products/get/${id}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}

@@ -20,17 +20,17 @@ import { tokenAtom } from '@/utils/user'
 import type { GetCategoryType, GetProductType } from '@/utils/type'
 
 interface NavbarProps {
-  searchQuery: string
-  setSearchQuery: (query: string) => void
-  filteredProducts: any[]
-  isLoggedIn: boolean
-  currentUser: string
-  setIsLoginOpen: (open: boolean) => void
-  setIsRegisterOpen: (open: boolean) => void
-  handleLogout: () => void
-  setIsCartOpen: (open: boolean) => void
-  getTotalItems: () => number
-  roleId: number | null
+  searchQuery?: string
+  setSearchQuery?: (query: string) => void
+  filteredProducts?: any[]
+  isLoggedIn?: boolean
+  currentUser?: string
+  setIsLoginOpen?: (open: boolean) => void
+  setIsRegisterOpen?: (open: boolean) => void
+  handleLogout?: () => void
+  setIsCartOpen?: (open: boolean) => void
+  getTotalItems?: () => number
+  roleId?: number | null
   onCategoryClick?: (categoryId: number) => void
   onProductClick?: (productId: number) => void
 }
@@ -114,7 +114,18 @@ export default function Navbar({
               {/* HOVER DROPDOWN */}
               {hoverMenu && (
                 <div
-                  className="absolute top-10 left-0 bg-white border border-slate-200 shadow-lg p-6 rounded-lg grid grid-cols-3 gap-6 animate-slideDown w-[50vw]"
+                  className="
+                absolute 
+                top-[180%] 
+                left-1/2 -translate-x-1/2
+                bg-white border border-slate-200 shadow-lg 
+                p-6 rounded-lg 
+                w-[90vw] sm:w-[80vw] lg:w-[50vw]
+                grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
+                gap-6 
+                animate-slideDown
+                z-50
+              "
                   onMouseEnter={() => setHoverMenu(hoverMenu)}
                   onMouseLeave={() => setHoverMenu(null)}
                 >
@@ -159,11 +170,11 @@ export default function Navbar({
                 className="text-gray-600 hover:text-blue-600"
               >
                 <ShoppingCart className="w-6 h-6" />
-                {getTotalItems() > 0 && (
+                {/* {getTotalItems() > 0 && (
                   <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {getTotalItems()}
                   </span>
-                )}
+                )} */}
               </button>
 
               {/* USER DROPDOWN */}

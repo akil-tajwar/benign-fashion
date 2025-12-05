@@ -122,7 +122,7 @@ export default function Home() {
       product?.product?.name
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      product.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+      product?.categoryName?.toLowerCase()?.includes(searchQuery.toLowerCase())
   )
 
   // Handle category click from navbar
@@ -496,15 +496,6 @@ export default function Home() {
         </main>
       )}
 
-      {/* Product Details Modal */}
-      {isProductModalOpen && selectedProduct && (
-        <ProductDetails
-          product={selectedProduct}
-          isOpen={isProductModalOpen}
-          onClose={closeProductModal}
-        />
-      )}
-
       {/* Cart Sidebar */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
@@ -604,49 +595,37 @@ export default function Home() {
         </div>
       )}
 
-      {/* Checkout Modal */}
-      {isCheckoutOpen && (
-        <CheckoutForm
-          isOpen={isCheckoutOpen}
-          onClose={() => setIsCheckoutOpen(false)}
-          onSubmit={handleOrderComplete}
-          totalAmount={getTotalPrice()}
-        />
-      )}
-
       {/* Login Modal */}
-      {isLoginOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsLoginOpen(false)}
-              className="absolute right-2 top-2"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-            <SignIn onLogin={handleLogin} />
-          </div>
-        </div>
-      )}
+      <SignIn
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onLogin={handleLogin}
+        onSwitchToRegister={() => {
+          setIsLoginOpen(false)
+          setIsRegisterOpen(true)
+        }}
+      />
 
       {/* Register Modal */}
-      {isRegisterOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsRegisterOpen(false)}
-              className="absolute right-2 top-2"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-            <RegisterForm onRegister={() => setIsRegisterOpen(false)} />
-          </div>
-        </div>
-      )}
+      <RegisterForm
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        onRegister={(user) =>
+          handleLogin({ userId: 0, username: user.username, email: user.email })
+        }
+        onSwitchToLogin={() => {
+          setIsRegisterOpen(false)
+          setIsLoginOpen(true)
+        }}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutForm
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cartTotal={getTotalPrice()}
+        onOrderComplete={handleOrderComplete}
+      />
 
       <Toaster />
       <Footer />

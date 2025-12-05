@@ -1,9 +1,21 @@
 import '.././globals.css'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Toaster } from '@/components/ui/toaster'
+import { ReactQueryProvider } from '@/provider/react-query-provider'
+import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar/dashboard-sidebar'
+import Navbar from '@/components/shared/navbar'
+import Footer from '@/components/shared/footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function HomeLayout({
+export const metadata: Metadata = {
+  title: 'cloth store',
+  description: 'Created with Next.js, TypeScript, Tailwind CSS, and shadcn/ui',
+}
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
@@ -11,9 +23,12 @@ export default function HomeLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="">
-          <div className="bg-white rounded">{children}</div>
-        </div>
+        <ReactQueryProvider>
+          <Navbar />
+          <main className="p-6">{children}</main>
+          <Toaster />
+          <Footer />
+        </ReactQueryProvider>
       </body>
     </html>
   )

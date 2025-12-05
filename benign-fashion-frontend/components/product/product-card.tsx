@@ -5,6 +5,7 @@ import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import type { GetProductType } from '@/utils/type'
+import Link from 'next/link'
 
 interface ProductCardProps {
   product: GetProductType
@@ -30,7 +31,8 @@ export default function ProductCard({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden h-full flex flex-col">
       {/* Image Section with hover zoom */}
-      <div
+      <Link
+        href={`/product-details/${product.product.id}`}
         className="aspect-square relative overflow-hidden bg-gray-100"
         onClick={handleProductClick}
         onMouseEnter={() => setIsImageHovered(true)}
@@ -45,7 +47,7 @@ export default function ProductCard({
             isImageHovered ? 'scale-110' : 'scale-100'
           }`}
         />
-      </div>
+      </Link>
 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-1" onClick={handleProductClick}>
