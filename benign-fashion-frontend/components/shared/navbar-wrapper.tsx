@@ -8,17 +8,17 @@ import type { GetProductType } from '@/utils/type'
 import { useSearch } from '@/hooks/use-search'
 
 interface NavbarWrapperProps {
-  onSearchChange?: (query: string, filteredProducts: GetProductType[]) => void
-  isLoggedIn?: boolean
-  currentUser?: string
-  setIsLoginOpen?: (open: boolean) => void
-  setIsRegisterOpen?: (open: boolean) => void
-  handleLogout?: () => void
-  setIsCartOpen?: (open: boolean) => void
-  getTotalItems?: () => number
-  roleId?: number | null
-  onCategoryClick?: (categoryId: number) => void
-  onProductClick?: (productId: number) => void
+  onSearchChange: (query: string, filteredProducts: GetProductType[]) => void
+  isLoggedIn: boolean
+  currentUser: string
+  setIsLoginOpen: (open: boolean) => void
+  setIsRegisterOpen: (open: boolean) => void
+  handleLogout: () => void
+  setIsCartOpen: (open: boolean) => void
+  getTotalItems: () => number
+  roleId: number | null
+  onCategoryClick: (categoryId: number) => void
+  onProductClick: (productId: number) => void
 }
 
 export default function NavbarWrapper({

@@ -20,19 +20,19 @@ import { tokenAtom } from '@/utils/user'
 import type { GetCategoryType, GetProductType } from '@/utils/type'
 
 interface NavbarProps {
-  searchQuery?: string
-  setSearchQuery?: (query: string) => void
-  filteredProducts?: any[]
-  isLoggedIn?: boolean
-  currentUser?: string
-  setIsLoginOpen?: (open: boolean) => void
-  setIsRegisterOpen?: (open: boolean) => void
-  handleLogout?: () => void
-  setIsCartOpen?: (open: boolean) => void
-  getTotalItems?: () => number
-  roleId?: number | null
-  onCategoryClick?: (categoryId: number) => void
-  onProductClick?: (productId: number) => void
+  searchQuery: string
+  setSearchQuery: (query: string) => void
+  filteredProducts: any[]
+  isLoggedIn: boolean
+  currentUser: string
+  setIsLoginOpen: (open: boolean) => void
+  setIsRegisterOpen: (open: boolean) => void
+  handleLogout: () => void
+  setIsCartOpen: (open: boolean) => void
+  getTotalItems: () => number
+  roleId: number | null
+  onCategoryClick: (categoryId: number) => void
+  onProductClick: (productId: number) => void
 }
 
 export default function Navbar({

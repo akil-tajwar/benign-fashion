@@ -4,14 +4,11 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Plus, Minus, X } from 'lucide-react'
 import Image from 'next/image'
-import SignIn, { UserType } from './login-form'
-import RegisterForm from './register-form'
 import CheckoutForm from './checkout-form'
 import HeroSlider from './hero-slider'
 import Footer from '../shared/footer'
 import ProductCard from '../product/product-card'
 import ProductDetails from '../product/product-details'
-// REMOVED: import Navbar from '../shared/navbar'
 import { fetchProducts } from '@/api/product-api'
 import { fetchCategories } from '@/api/categories-api'
 import { createCart, fetchCarts, deleteCart } from '@/api/cart-api'
@@ -23,28 +20,22 @@ import type { GetProductType, GetCart, GetCategoryType } from '@/utils/type'
 import { createOrderApi } from '@/api/orders-api'
 import { Toaster } from '@/components/ui/toaster'
 import { useSearch } from '@/hooks/use-search'
+import { useCart } from '@/hooks/use-cart'
+import SignIn from './login-form'
 
 export default function Home() {
   useInitializeUser()
   const [token] = useAtom(tokenAtom)
   const [userData] = useAtom(userDataAtom)
   const { toast } = useToast()
-  const { searchQuery, filteredProducts, setAllProducts } = useSearch() // Use global search context
+  const { searchQuery, filteredProducts, setAllProducts } = useSearch()
+  const { isCartOpen, setIsCartOpen } = useCart()
   const [products, setProducts] = useState<GetProductType[]>([])
   const [categories, setCategories] = useState<GetCategoryType[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const [cartItems, setCartItems] = useState<GetCart[]>([])
-  const [isCartOpen, setIsCartOpen] = useState(false)
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [currentUser, setCurrentUser] = useState('')
-  const [roleId, setRoleId] = useState<number | null>(null)
-  const [savedRoleId, setSavedRoleId] = useState<number | null>(null)
-
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
   const [selectedProduct, setSelectedProduct] = useState<GetProductType | null>(
@@ -262,44 +253,7 @@ export default function Home() {
     }))
   }
 
-  const handleLogin = async (user: UserType) => {
-    setIsLoggedIn(true)
-    setCurrentUser(user.username)
-    setRoleId(user.roleId ?? 0)
-    localStorage.setItem('currentUser', JSON.stringify(user))
-    localStorage.setItem('roleId', String(user.roleId ?? 0))
-    setSavedRoleId(user.roleId ?? 0)
-    await loadUserCart()
-  }
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedUser = localStorage.getItem('currentUser')
-      const storedRoleId = localStorage.getItem('roleId')
-
-      if (savedUser) {
-        const parsedUser: UserType = JSON.parse(savedUser)
-        setIsLoggedIn(true)
-        setCurrentUser(parsedUser.username)
-        setRoleId(parsedUser.roleId ?? 0)
-      }
-
-      if (storedRoleId) {
-        setSavedRoleId(Number.parseInt(storedRoleId))
-      }
-    }
-  }, [])
-
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setCurrentUser('')
-    setRoleId(null)
-    setSavedRoleId(null)
-    setCartItems([])
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('currentUser')
-    localStorage.removeItem('roleId')
-  }
+  // REMOVED: handleLogin, handleLogout, useEffect for localStorage - now in LayoutClientWrapper
 
   const handleOrderComplete = async () => {
     if (!token || !userData?.userId) {
@@ -578,30 +532,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Login Modal */}
-      <SignIn
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onLogin={handleLogin}
-        onSwitchToRegister={() => {
-          setIsLoginOpen(false)
-          setIsRegisterOpen(true)
-        }}
-      />
-
-      {/* Register Modal */}
-      <RegisterForm
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
-        onRegister={(user) =>
-          handleLogin({ userId: 0, username: user.username, email: user.email })
-        }
-        onSwitchToLogin={() => {
-          setIsRegisterOpen(false)
-          setIsLoginOpen(true)
-        }}
-      />
 
       {/* Checkout Modal */}
       <CheckoutForm
