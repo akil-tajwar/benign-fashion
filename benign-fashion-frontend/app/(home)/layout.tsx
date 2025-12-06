@@ -1,12 +1,10 @@
 import '.././globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/toaster'
 import { ReactQueryProvider } from '@/provider/react-query-provider'
-import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar/dashboard-sidebar'
-import Navbar from '@/components/shared/navbar'
 import Footer from '@/components/shared/footer'
+import LayoutClientWrapper from './layout-client-wrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,10 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
-          <Navbar />
-          <main className="p-6">{children}</main>
-          <Toaster />
-          <Footer />
+          <LayoutClientWrapper>
+            <main className="p-6">{children}</main>
+            <Toaster />
+            <Footer />
+          </LayoutClientWrapper>
         </ReactQueryProvider>
       </body>
     </html>

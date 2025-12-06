@@ -11,7 +11,7 @@ import HeroSlider from './hero-slider'
 import Footer from '../shared/footer'
 import ProductCard from '../product/product-card'
 import ProductDetails from '../product/product-details'
-import Navbar from '../shared/navbar'
+// REMOVED: import Navbar from '../shared/navbar'
 import { fetchProducts } from '@/api/product-api'
 import { fetchCategories } from '@/api/categories-api'
 import { createCart, fetchCarts, deleteCart } from '@/api/cart-api'
@@ -22,12 +22,14 @@ import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 import type { GetProductType, GetCart, GetCategoryType } from '@/utils/type'
 import { createOrderApi } from '@/api/orders-api'
 import { Toaster } from '@/components/ui/toaster'
+import { useSearch } from '@/hooks/use-search'
 
 export default function Home() {
   useInitializeUser()
   const [token] = useAtom(tokenAtom)
   const [userData] = useAtom(userDataAtom)
   const { toast } = useToast()
+  const { searchQuery, filteredProducts, setAllProducts } = useSearch() // Use global search context
   const [products, setProducts] = useState<GetProductType[]>([])
   const [categories, setCategories] = useState<GetCategoryType[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,7 +37,7 @@ export default function Home() {
 
   const [cartItems, setCartItems] = useState<GetCart[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUser, setCurrentUser] = useState('')
   const [roleId, setRoleId] = useState<number | null>(null)
@@ -76,14 +78,16 @@ export default function Home() {
   const getProducts = useCallback(async () => {
     try {
       const res = await fetchProducts(token)
-      setProducts(res.data ?? [])
+      const productsData = res.data ?? []
+      setProducts(productsData)
+      setAllProducts(productsData) // Update global context with all products
     } catch (err) {
       console.error(err)
       setError('Failed to load products')
     } finally {
       setLoading(false)
     }
-  }, [token])
+  }, [token, setAllProducts])
 
   // Fetch user cart from DB
   const loadUserCart = useCallback(async () => {
@@ -117,14 +121,6 @@ export default function Home() {
     return category?.categoryType === 'kids'
   })
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product?.product?.name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      product?.categoryName?.toLowerCase()?.includes(searchQuery.toLowerCase())
-  )
-
   // Handle category click from navbar
   const handleCategoryClick = (categoryId: number) => {
     const categoryElement = categoryRefs.current[categoryId]
@@ -148,6 +144,8 @@ export default function Home() {
       openProductModal(product)
     }
   }
+
+  // REMOVED: handleSearchChange - now handled by global context
 
   // Add to cart function
   const addToCart = async (product: GetProductType) => {
@@ -373,21 +371,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filteredProducts={filteredProducts}
-        isLoggedIn={isLoggedIn}
-        currentUser={currentUser}
-        setIsLoginOpen={setIsLoginOpen}
-        setIsRegisterOpen={setIsRegisterOpen}
-        handleLogout={handleLogout}
-        setIsCartOpen={setIsCartOpen}
-        getTotalItems={getTotalItems}
-        roleId={savedRoleId ?? roleId}
-        onCategoryClick={handleCategoryClick}
-        onProductClick={handleProductClickFromNav}
-      />
+      {/* REMOVED NAVBAR - Now comes from layout */}
 
       <HeroSlider />
 
