@@ -78,7 +78,7 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
                       </h3>
                       {item.discount > 0 && (
                         <span className="text-xs text-slate-600 font-medium">
-                          size - 
+                          size - {item.size}
                         </span>
                       )}
                     </div>

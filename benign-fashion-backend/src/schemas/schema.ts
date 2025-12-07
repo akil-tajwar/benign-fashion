@@ -93,21 +93,6 @@ export const photosModel = mysqlTable("photos", {
   url: text("url").notNull(),
 });
 
-// ================= CARTS =================
-export const cartsModel = mysqlTable("carts", {
-  id: int("id").primaryKey().autoincrement(),
-  productId: int("product_id")
-    .notNull()
-    .references(() => productsModel.id, { onDelete: "cascade" }),
-  productCode: varchar("product_code", { length: 20 }).unique(),
-  userId: int("user_id")
-    .notNull()
-    .references(() => userModel.userId, { onDelete: "cascade" }),
-  size: mysqlEnum("size", ["M", "L", "XL", "XXL"]).notNull(),
-  quantity: int("quantity").notNull().default(1),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 // ================= ORDERS =================
 export const ordersModel = mysqlTable("orders", {
   id: int("id").primaryKey().autoincrement(),
@@ -135,7 +120,6 @@ export const userRelations = relations(userModel, ({ one, many }) => ({
     fields: [userModel.roleId],
     references: [roleModel.roleId],
   }),
-  carts: many(cartsModel),
   orders: many(ordersModel),
   userRoles: many(userRolesModel),
 }));
@@ -195,17 +179,6 @@ export const categoryRelations = relations(categoriesModel, ({ many }) => ({
   products: many(productsModel),
 }));
 
-export const cartRelations = relations(cartsModel, ({ one }) => ({
-  product: one(productsModel, {
-    fields: [cartsModel.productId],
-    references: [productsModel.id],
-  }),
-  user: one(userModel, {
-    fields: [cartsModel.userId],
-    references: [userModel.userId],
-  }),
-}));
-
 export const orderRelations = relations(ordersModel, ({ one }) => ({
   user: one(userModel, {
     fields: [ordersModel.userId],
@@ -239,7 +212,5 @@ export type Category = typeof categoriesModel.$inferSelect;
 export type NewCategory = typeof categoriesModel.$inferInsert;
 export type Product = typeof productsModel.$inferSelect;
 export type NewProduct = typeof productsModel.$inferInsert;
-export type Cart = typeof cartsModel.$inferSelect;
-export type NewCart = typeof cartsModel.$inferInsert;
 export type Order = typeof ordersModel.$inferSelect;
 export type NewOrder = typeof ordersModel.$inferInsert;

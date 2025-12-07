@@ -15,14 +15,12 @@ import { tokenAtom, useInitializeUser } from '@/utils/user'
 import type { GetProductType, GetCategoryType } from '@/utils/type'
 import { Toaster } from '@/components/ui/toaster'
 import { useSearch } from '@/hooks/use-search'
-import { useCart } from '@/hooks/use-cart'
 
 export default function Home() {
   useInitializeUser()
   const [token] = useAtom(tokenAtom)
   const { toast } = useToast()
   const { searchQuery, filteredProducts, setAllProducts } = useSearch()
-  const { addToCart } = useCart()
 
   const [products, setProducts] = useState<GetProductType[]>([])
   const [categories, setCategories] = useState<GetCategoryType[]>([])
@@ -90,15 +88,6 @@ export default function Home() {
     return category?.categoryType === 'kids'
   })
 
-  // Handle add to cart with localStorage
-  const handleAddToCart = (product: GetProductType) => {
-    addToCart(product, 1)
-    toast({
-      title: 'Added to Cart',
-      description: `${product.product.name} has been added to your cart.`,
-    })
-  }
-
   const openProductModal = (product: GetProductType) => {
     setSelectedProduct(product)
     setIsProductModalOpen(true)
@@ -135,7 +124,6 @@ export default function Home() {
                 key={product.product.id}
                 product={product}
                 onProductClick={openProductModal}
-                onAddToCart={handleAddToCart}
               />
             ))}
           </div>
@@ -169,14 +157,15 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {menProducts.slice(0, 4).map((product) => (
-                  <ProductCard
-                    key={product.product.id}
-                    product={product}
-                    onProductClick={openProductModal}
-                    onAddToCart={handleAddToCart}
-                  />
-                ))}
+                {menProducts
+                  .slice(0, categoryLimits['men'] || 4)
+                  .map((product) => (
+                    <ProductCard
+                      key={product.product.id}
+                      product={product}
+                      onProductClick={openProductModal}
+                    />
+                  ))}
               </div>
             </section>
           )}
@@ -191,7 +180,7 @@ export default function Home() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  Kid&apos;s Collection
+                  Kid's Collection
                 </h2>
                 {kidsProducts.length > 4 && (
                   <Button
@@ -205,14 +194,15 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {kidsProducts.slice(0, 4).map((product) => (
-                  <ProductCard
-                    key={product.product.id}
-                    product={product}
-                    onProductClick={openProductModal}
-                    onAddToCart={handleAddToCart}
-                  />
-                ))}
+                {kidsProducts
+                  .slice(0, categoryLimits['kids'] || 4)
+                  .map((product) => (
+                    <ProductCard
+                      key={product.product.id}
+                      product={product}
+                      onProductClick={openProductModal}
+                    />
+                  ))}
               </div>
             </section>
           )}
@@ -228,7 +218,6 @@ export default function Home() {
       )}
 
       <Toaster />
-      <Footer />
     </div>
   )
 }

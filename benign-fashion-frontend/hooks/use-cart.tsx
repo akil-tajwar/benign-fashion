@@ -18,19 +18,20 @@ interface CartItem {
   url: string
   discount: number
   productCode: string
+  size: string // Added size field
 }
 
 interface CartContextType {
   cartItems: CartItem[]
   isCartOpen: boolean
   setIsCartOpen: (open: boolean) => void
-  addToCart: (product: GetProductType, quantity?: number) => void
-  updateQuantity: (productId: number, newQuantity: number) => void
-  removeFromCart: (productId: number) => void
+  addToCart: (product: GetProductType, size: string, quantity?: number) => void
+  updateQuantity: (productId: number, size: string, newQuantity: number) => void
+  removeFromCart: (productId: number, size: string) => void
   clearCart: () => void
   getTotalPrice: () => number
   getTotalItems: () => number
-  getCartItemQuantity: (productId: number) => number
+  getCartItemQuantity: (productId: number, size: string) => number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -64,21 +65,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [cartItems, isInitialized])
 
-  const addToCart = (product: GetProductType, quantity: number = 1) => {
+  const addToCart = (
+    product: GetProductType,
+    size: string,
+    quantity: number = 1
+  ) => {
     setCartItems((prevItems) => {
+      // Find existing item with same product ID AND size
       const existingItem = prevItems.find(
-        (item) => item.productId === product.product.id
+        (item) => item.productId === product.product.id && item.size === size
       )
 
       if (existingItem) {
-        // Update quantity if item already exists
+        // Update quantity if item with same size already exists
         return prevItems.map((item) =>
-          item.productId === product.product.id
+          item.productId === product.product.id && item.size === size
             ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       } else {
-        // Add new item
+        // Add new item with size
         const newItem: CartItem = {
           productId: product.product.id ?? 0,
           name: product.product.name,
@@ -87,28 +93,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
           url: product.photoUrls?.[0]?.url || '',
           discount: product.product.discount,
           productCode: product.product.productCode ?? '',
+          size: size,
         }
         return [...prevItems, newItem]
       }
     })
   }
 
-  const updateQuantity = (productId: number, newQuantity: number) => {
+  const updateQuantity = (
+    productId: number,
+    size: string,
+    newQuantity: number
+  ) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId)
+      removeFromCart(productId, size)
       return
     }
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.productId === productId ? { ...item, quantity: newQuantity } : item
+        item.productId === productId && item.size === size
+          ? { ...item, quantity: newQuantity }
+          : item
       )
     )
   }
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: number, size: string) => {
     setCartItems((prevItems) =>
-      prevItems.filter((item) => item.productId !== productId)
+      prevItems.filter(
+        (item) => !(item.productId === productId && item.size === size)
+      )
     )
   }
 
@@ -128,8 +143,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return cartItems.reduce((total, item) => total + item.quantity, 0)
   }
 
-  const getCartItemQuantity = (productId: number) => {
-    const item = cartItems.find((item) => item.productId === productId)
+  const getCartItemQuantity = (productId: number, size: string) => {
+    const item = cartItems.find(
+      (item) => item.productId === productId && item.size === size
+    )
     return item ? item.quantity : 0
   }
 

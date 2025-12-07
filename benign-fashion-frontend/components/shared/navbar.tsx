@@ -112,7 +112,7 @@ export default function Navbar({
               >
                 Kids
               </p>
-              <Link href={'/dashboard/categories'}>Dashbaord</Link>
+              <Link href={'/dashboard/categories'}>Dashboard</Link>
 
               {/* HOVER DROPDOWN */}
               {hoverMenu && (
@@ -163,6 +163,7 @@ export default function Navbar({
               <button
                 onClick={() => setShowSearchOverlay(true)}
                 className="text-gray-600 hover:text-blue-600"
+                aria-label="Search"
               >
                 <Search className="w-8 h-8" />
               </button>
@@ -171,17 +172,18 @@ export default function Navbar({
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="text-gray-600 hover:text-blue-600 relative"
+                aria-label="Shopping cart"
               >
-                <p className='absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0'>{cartItems.length}</p>
+                <p className="absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0">
+                  {cartItems.length}
+                </p>
                 <ShoppingCart className="w-8 h-8" />
               </button>
 
-              {/* USER DROPDOWN */}
+              {/* USER DROPDOWN - FIXED: Removed nested button */}
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <button>
-                    <User className="text-gray-600 hover:text-blue-600 mt-2 w-8 h-8" />
-                  </button>
+                <DropdownMenuTrigger className="text-gray-600 hover:text-blue-600 outline-none">
+                  <User className="w-8 h-8" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 p-2 bg-white border rounded-lg shadow-lg">
                   {!isLoggedIn ? (
@@ -232,7 +234,10 @@ export default function Navbar({
         <div className="fixed inset-0 bg-white z-50 h-fit animate-slideDownFast p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-semibold">Search Products</h2>
-            <button onClick={() => setShowSearchOverlay(false)}>
+            <button
+              onClick={() => setShowSearchOverlay(false)}
+              aria-label="Close search"
+            >
               <X className="w-6 h-6 text-gray-700" />
             </button>
           </div>
@@ -257,12 +262,3 @@ export default function Navbar({
     </>
   )
 }
-
-/* Tailwind Animations */
-// Add to globals.css if needed:
-// .animate-slideDown { @apply animate-[slideDown_0.25s_ease-out]; }
-// .animate-slideDownFast { @apply animate-[slideDown_0.15s_ease-out]; }
-// @keyframes slideDown {
-//   0% { opacity: 0; transform: translateY(-20px); }
-//   100% { opacity: 1; transform: translateY(0); }
-// }

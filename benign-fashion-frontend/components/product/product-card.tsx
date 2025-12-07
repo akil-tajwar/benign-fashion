@@ -1,31 +1,55 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import type { GetProductType } from '@/utils/type'
 import Link from 'next/link'
+import { useCart } from '@/hooks/use-cart'
+import { useToast } from '@/hooks/use-toast'
 
 interface ProductCardProps {
   product: GetProductType
-  onAddToCart: (product: GetProductType) => void
   onProductClick: (product: GetProductType) => void
 }
 
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
+
 export default function ProductCard({
   product,
-  onAddToCart,
   onProductClick,
 }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
+  const [selectedSize, setSelectedSize] = useState<string>('')
+
+  const { addToCart } = useCart()
+  const { toast } = useToast()
 
   const firstImage =
     product.photoUrls?.[0]?.url || '/diverse-products-still-life.png'
 
   const handleProductClick = () => {
     onProductClick(product)
+  }
+
+  const handleSizeSelect = (e: React.MouseEvent, size: string) => {
+    e.stopPropagation()
+    setSelectedSize(size)
+
+    // Add to cart immediately when size is selected
+    addToCart(product, size, 1)
+
+    toast({
+      title: 'Added to Cart',
+      description: `${product.product.name} (Size: ${size}) has been added to your cart.`,
+    })
+
+    // Reset after a short delay
+    setTimeout(() => {
+      setSelectedSize('')
+      setIsButtonHovered(false)
+    }, 500)
   }
 
   return (
@@ -47,70 +71,86 @@ export default function ProductCard({
             isImageHovered ? 'scale-110' : 'scale-100'
           }`}
         />
+        {product.product.discount > 0 && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            -{product.product.discount}%
+          </div>
+        )}
       </Link>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col flex-1" onClick={handleProductClick}>
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base">
-          {product.product.name}
-        </h3>
+      <div className="p-4 flex flex-col flex-1">
+        <div onClick={handleProductClick} className="cursor-pointer">
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base">
+            {product.product.name}
+          </h3>
 
-        <p className="text-xs text-gray-500 mb-3 line-clamp-1">
-          {product.categoryName}
-        </p>
+          <p className="text-xs text-gray-500 mb-3 line-clamp-1">
+            {product.categoryName}
+          </p>
 
-        <div className="flex items-center justify-between mb-3 mt-auto">
-          <div className="flex items-center space-x-2">
-            <span className="text-base md:text-lg font-bold text-gray-900">
-              ৳{product.product.price}
-            </span>
-            {product.product.discount > 0 && (
-              <span className="text-xs text-red-500 line-through">
-                ৳{product.product.price + product.product.discount}
+          <div className="flex items-center justify-between mb-3 mt-auto">
+            <div className="flex items-center space-x-2">
+              <span className="text-base md:text-lg font-bold text-gray-900">
+                ৳
+                {(
+                  product.product.price *
+                  (1 - product.product.discount / 100)
+                ).toFixed(2)}
               </span>
-            )}
+              {product.product.discount > 0 && (
+                <span className="text-xs text-gray-400 line-through">
+                  ৳{product.product.price.toFixed(2)}
+                </span>
+              )}
+            </div>
+            <span
+              className={`text-xs px-2 py-1 rounded ${
+                product.product.isAvailable
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {product.product.isAvailable ? 'In Stock' : 'Out of Stock'}
+            </span>
           </div>
-          <span
-            className={`text-xs px-2 py-1 rounded ${
-              product.product.isAvailable
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-red-100 text-red-800'
-            }`}
-          >
-            {product.product.isAvailable ? 'In Stock' : 'Out of Stock'}
-          </span>
         </div>
 
-        <Button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddToCart(product)
-          }}
+        <div
           onMouseEnter={() => setIsButtonHovered(true)}
-          onMouseLeave={() => setIsButtonHovered(false)}
-          disabled={!product.product.isAvailable}
-          className="w-full text-white disabled:bg-gray-300 transition-all duration-500 text-sm md:text-base h-9 md:h-10 bg-blue-600 hover:bg-blue-700"
+          onMouseLeave={() => {
+            if (!selectedSize) {
+              setIsButtonHovered(false)
+            }
+          }}
+          className="w-full"
         >
-          <div className="relative flex items-center justify-center overflow-hidden h-5">
-            {/* Text */}
-            <div
-              className={`transition-transform duration-500 ease-in-out ${
-                isButtonHovered ? '-translate-y-full' : 'translate-y-0'
-              }`}
+          {!isButtonHovered ? (
+            <Button
+              disabled={!product.product.isAvailable}
+              className="w-full text-white disabled:bg-gray-300 transition-all duration-300 text-sm md:text-base h-10 md:h-11 bg-blue-600 hover:bg-blue-700"
+              onClick={(e) => e.stopPropagation()}
             >
-              <span className="block">Add to Cart</span>
+              <span className="block font-medium">Add to Cart</span>
+            </Button>
+          ) : (
+            <div className="w-full h-10 md:h-11 bg-blue-600 rounded-md flex items-center justify-center gap-1 px-2 animate-in fade-in duration-300">
+              {SIZES.map((size) => (
+                <button
+                  key={size}
+                  onClick={(e) => handleSizeSelect(e, size)}
+                  className={`px-2 py-1 text-xs font-semibold rounded transition-all duration-200 ${
+                    selectedSize === size
+                      ? 'bg-white text-blue-600 scale-110'
+                      : 'bg-blue-700 text-white hover:bg-white hover:text-blue-600'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
             </div>
-
-            {/* Shopping Cart */}
-            <div
-              className={`absolute transition-transform duration-500 ease-in-out ${
-                isButtonHovered ? 'translate-y-0' : 'translate-y-full'
-              }`}
-            >
-              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-            </div>
-          </div>
-        </Button>
+          )}
+        </div>
       </div>
     </div>
   )
