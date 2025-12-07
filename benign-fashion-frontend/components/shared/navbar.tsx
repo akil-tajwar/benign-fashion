@@ -18,6 +18,7 @@ import { fetchCategories } from '@/api/categories-api'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
 import type { GetCategoryType, GetProductType } from '@/utils/type'
+import { useCart } from '@/hooks/use-cart'
 
 interface NavbarProps {
   searchQuery: string
@@ -57,6 +58,8 @@ export default function Navbar({
   const [hoverMenu, setHoverMenu] = useState<string | null>(null)
   const [showSearchOverlay, setShowSearchOverlay] = useState(false)
   const router = useRouter()
+
+  const { cartItems } = useCart()
 
   useEffect(() => {
     const loadData = async () => {
@@ -161,27 +164,23 @@ export default function Navbar({
                 onClick={() => setShowSearchOverlay(true)}
                 className="text-gray-600 hover:text-blue-600"
               >
-                <Search className="w-6 h-6" />
+                <Search className="w-8 h-8" />
               </button>
 
               {/* CART */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="text-gray-600 hover:text-blue-600"
+                className="text-gray-600 hover:text-blue-600 relative"
               >
-                <ShoppingCart className="w-6 h-6" />
-                {/* {getTotalItems() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {getTotalItems()}
-                  </span>
-                )} */}
+                <p className='absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0'>{cartItems.length}</p>
+                <ShoppingCart className="w-8 h-8" />
               </button>
 
               {/* USER DROPDOWN */}
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <button>
-                    <User className="text-gray-600 hover:text-blue-600 mt-2" />
+                    <User className="text-gray-600 hover:text-blue-600 mt-2 w-8 h-8" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 p-2 bg-white border rounded-lg shadow-lg">

@@ -6,16 +6,19 @@ import { useAtom } from 'jotai'
 import { tokenAtom, useInitializeUser } from '@/utils/user'
 import type { GetProductType } from '@/utils/type'
 import { fetchProductById, fetchProducts } from '@/utils/api'
-import { toast } from '@/hooks/use-toast'
+import { toast, useToast } from '@/hooks/use-toast'
 import { ChevronRight, Minus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '../ui/button'
 import size from '../../public/size.jpeg'
+import { useCart } from '@/hooks/use-cart'
 
 export default function ProductDetails() {
   useInitializeUser()
   const params = useParams()
+  const { addToCart } = useCart()
+  const { toast } = useToast()
   const id = Number(params.id)
   const [token] = useAtom(tokenAtom)
   const [product, setProduct] = useState<GetProductType | null>(null)
@@ -214,7 +217,8 @@ export default function ProductDetails() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                You Save {product.product.price * (product.product.discount * 100)}%
+                You Save{' '}
+                {product.product.price * (product.product.discount * 100)}%
               </p>
             </div>
 
@@ -262,6 +266,14 @@ export default function ProductDetails() {
                 <Button
                   variant={'default'}
                   className="w-full bg-black text-white py-3 rounded hover:opacity-90 transition-opacity"
+                  onClick={() => {
+                    if (!product) return
+                    addToCart(product)
+                    toast({
+                      title: 'Success',
+                      description: 'Product added to cart successfully!',
+                    })
+                  }}
                 >
                   ADD TO CART
                 </Button>
