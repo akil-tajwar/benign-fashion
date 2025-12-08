@@ -78,6 +78,8 @@ export const productSchema = z.object({
     categoryId: z.number(),
     subCategoryId: z.number(),
     isAvailable: z.boolean().default(true),
+    isFlashSale: z.boolean().default(true),
+    availableSize: z.array(z.enum(['S', 'M', 'L', 'XL', 'XXL'])),
     createdAt: z.string().optional(),
   }),
 

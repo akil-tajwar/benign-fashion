@@ -86,7 +86,7 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
                       <p className="font-semibold text-lg">
                         ৳{(item.price * item.quantity).toFixed(2)}
                       </p>
-                      <div className="flex items-center space-x-2 mr-3 border-2 border-gray-300">
+                      <div className="flex items-center space-x-2 mr-3 border-2 rounded border-gray-300">
                         <button
                           className=" hover:bg-gray-100 transition-colors border-r-2 px-2 border-gray-300"
                           onClick={() =>

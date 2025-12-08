@@ -66,7 +66,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative bg-gradient-to-r from-blue-50 to-blue-100 py-2 overflow-hidden"
+      
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

@@ -28,6 +28,8 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
 
+  const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+
   const getProductbyId = useCallback(async () => {
     if (!token) return
 
@@ -249,19 +251,30 @@ export default function ProductDetails() {
                 )}
               </label>
               <div className="flex gap-2 flex-wrap">
-                {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-5 py-2 border-2 rounded font-medium transition-all duration-200 ${
-                      selectedSize === size
-                        ? 'border-blue-600 bg-blue-600 text-white scale-105'
-                        : 'border-gray-300 text-foreground hover:border-blue-400 hover:bg-blue-50'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {ALL_SIZES.map((size) => {
+                  const isAvailable =
+                    product.product?.availableSize?.includes(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')
+
+                  return (
+                    <button
+                      key={size}
+                      disabled={!isAvailable}
+                      onClick={() => isAvailable && setSelectedSize(size)}
+                      className={`
+          px-5 py-2 border-2 rounded font-medium transition-all duration-200
+          ${
+            isAvailable
+              ? selectedSize === size
+                ? 'border-blue-600 bg-blue-600 text-white scale-105'
+                : 'border-gray-300 text-foreground hover:border-blue-400 hover:bg-blue-50'
+              : 'border-gray-300 text-gray-400 line-through cursor-not-allowed opacity-60'
+          }
+        `}
+                    >
+                      {size}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

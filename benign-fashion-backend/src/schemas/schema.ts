@@ -9,6 +9,7 @@ import {
   mysqlEnum,
   json,
 } from "drizzle-orm/mysql-core";
+import { array } from "zod";
 
 // ================= ROLES =================
 export const roleModel = mysqlTable("roles", {
@@ -81,6 +82,8 @@ export const productsModel = mysqlTable("products", {
     .notNull()
     .references(() => categoriesModel.id, { onDelete: "cascade" }),
   isAvailable: boolean("is_available").default(true),
+  isFlashSale: boolean("is_flash_sale").default(true),
+  availableSize: json("available_size").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -64,6 +64,8 @@ const Products = () => {
       categoryId: 0,
       subCategoryId: 0,
       isAvailable: true,
+      isFlashSale: false,
+      availableSize: [],
     },
     photoUrls: [{ url: '' }],
   })
@@ -201,6 +203,8 @@ const Products = () => {
         categoryId: 0,
         subCategoryId: 0,
         isAvailable: true,
+        isFlashSale: false,
+        availableSize: [],
       },
       photoUrls: [{ url: '' }],
     })
@@ -222,6 +226,8 @@ const Products = () => {
         categoryId: product.product.categoryId,
         subCategoryId: product.product.subCategoryId,
         isAvailable: product.product.isAvailable,
+        isFlashSale: product.product.isFlashSale,
+        availableSize: product.product.availableSize,
       },
       photoUrls:
         product.photoUrls.length > 0 ? product.photoUrls : [{ url: '' }],
@@ -313,6 +319,8 @@ const Products = () => {
                 categoryId: 0,
                 subCategoryId: 0,
                 isAvailable: true,
+                isFlashSale: false,
+                availableSize: [],
               },
               photoUrls: [{ url: '' }],
             })
@@ -440,19 +448,6 @@ const Products = () => {
               />
             </div>
 
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.product.description || ''}
-                onChange={handleInputChange}
-                placeholder="Enter product description"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                rows={3}
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="price">Price*</Label>
               <Input
@@ -534,6 +529,19 @@ const Products = () => {
               />
             </div>
 
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.product.description || ''}
+                onChange={handleInputChange}
+                placeholder="Enter product description"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                rows={3}
+              />
+            </div>
+
             <div className="flex items-center gap-2">
               <Checkbox
                 id="isAvailable"
@@ -552,6 +560,63 @@ const Products = () => {
               <Label htmlFor="isAvailable" className="cursor-pointer">
                 Is Available
               </Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isFlashSale"
+                name="isFlashSale"
+                checked={formData.product.isFlashSale}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    product: {
+                      ...prev.product,
+                      isFlashSale: checked as boolean,
+                    },
+                  }))
+                }
+              />
+              <Label htmlFor="isFlashSale" className="cursor-pointer">
+                Is Flash Sale
+              </Label>
+            </div>
+
+            <div className="flex flex-col gap-2 space-y-2 py-3">
+              <Label className="font-semibold">Available Sizes</Label>
+              <div className="flex flex-wrap gap-4">
+                {['S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                  <div key={size} className="flex items-center gap-2">
+                    <Checkbox
+                      id={size}
+                      name="availableSize"
+                      checked={formData.product.availableSize.includes(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => {
+                          const sizes = new Set(prev.product.availableSize)
+
+                          if (checked) {
+                            sizes.add(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')
+                          } else {
+                            sizes.delete(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')
+                          }
+
+                          return {
+                            ...prev,
+                            product: {
+                              ...prev.product,
+                              availableSize: Array.from(sizes),
+                            },
+                          }
+                        })
+                      }
+                    />
+                    <Label htmlFor={size} className="cursor-pointer">
+                      {size}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

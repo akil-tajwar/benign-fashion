@@ -13,7 +13,7 @@ interface ProductCardProps {
   onProductClick: (product: GetProductType) => void
 }
 
-const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
+const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export default function ProductCard({
   product,
@@ -123,33 +123,56 @@ export default function ProductCard({
               setIsButtonHovered(false)
             }
           }}
-          className="w-full"
+          className="w-full relative h-10 md:h-11 overflow-hidden"
         >
-          {!isButtonHovered ? (
-            <Button
-              disabled={!product.product.isAvailable}
-              className="w-full text-white disabled:bg-gray-300 transition-all duration-300 text-sm md:text-base h-10 md:h-11 bg-blue-600 hover:bg-blue-700"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="block font-medium">Add to Cart</span>
-            </Button>
-          ) : (
-            <div className="w-full h-10 md:h-11 bg-blue-600 rounded-md flex items-center justify-center gap-1 px-2 animate-in fade-in duration-300">
-              {SIZES.map((size) => (
+          {/* === ADD TO CART VIEW === */}
+          <Button
+            disabled={!product.product.isAvailable}
+            onClick={(e) => e.stopPropagation()}
+            className={`
+      absolute inset-0 w-full text-white disabled:bg-gray-300 
+      text-sm md:text-base bg-blue-600 hover:bg-blue-700
+      transition-transform duration-500 ease-in-out
+      ${isButtonHovered ? '-translate-y-full' : 'translate-y-0'}
+    `}
+          >
+            <span className="block font-medium">Add to Cart</span>
+          </Button>
+
+          {/* === SIZE BUTTONS VIEW === */}
+          <div
+            className={`
+      absolute inset-0 bg-blue-600 rounded-md flex items-center justify-center gap-1 px-2
+      transition-transform duration-500 ease-in-out
+      ${isButtonHovered ? 'translate-y-0' : 'translate-y-full'}
+    `}
+          >
+            {ALL_SIZES.map((size) => {
+              const isAvailable = product.product?.availableSize?.includes(
+                size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
+              )
+
+              return (
                 <button
                   key={size}
-                  onClick={(e) => handleSizeSelect(e, size)}
-                  className={`px-2 py-1 text-xs font-semibold rounded transition-all duration-200 ${
-                    selectedSize === size
-                      ? 'bg-white text-blue-600 scale-110'
-                      : 'bg-blue-700 text-white hover:bg-white hover:text-blue-600'
-                  }`}
+                  disabled={!isAvailable}
+                  onClick={(e) => isAvailable && handleSizeSelect(e, size)}
+                  className={`
+            px-2 py-1 text-xs font-semibold rounded transition-all duration-200 
+            ${
+              isAvailable
+                ? selectedSize === size
+                  ? 'bg-white text-blue-600 scale-110'
+                  : 'bg-white text-blue-700 hover:bg-white hover:text-blue-600'
+                : 'bg-gray-300 text-gray-900 line-through cursor-not-allowed opacity-60'
+            }
+          `}
                 >
                   {size}
                 </button>
-              ))}
-            </div>
-          )}
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
