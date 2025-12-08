@@ -51,13 +51,13 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {cartItems.map((item) => (
+              {cartItems.map((item, index) => (
                 <div
-                  key={item.productId}
+                  key={index}
                   className="flex items-start space-x-3 w-full bg-gray-50 border py-3 rounded-lg relative"
                 >
                   <button
-                    onClick={() => removeFromCart(item.productId)}
+                    onClick={() => removeFromCart(item.productId, item.size)}
                     className="absolute top-2 right-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
                     aria-label="Remove item"
                   >
@@ -86,30 +86,26 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
                       <p className="font-semibold text-lg">
                         ৳{(item.price * item.quantity).toFixed(2)}
                       </p>
-                      <div className="flex items-center space-x-2 mr-3">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="w-8 h-8 bg-white"
+                      <div className="flex items-center space-x-2 mr-3 border-2 border-gray-300">
+                        <button
+                          className=" hover:bg-gray-100 transition-colors border-r-2 px-2 border-gray-300"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity - 1)
+                            updateQuantity(item.productId, item.size, item.quantity - 1)
                           }
                         >
-                          <Minus className="w-3 h-3" />
-                        </Button>
+                          <Minus className="w-7 h-7 p-2" />
+                        </button>
                         <span className="w-8 text-center text-sm font-medium">
                           {item.quantity}
                         </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="w-8 h-8 bg-white"
+                        <button
+                          className=" hover:bg-gray-100 transition-colors border-l-2 px-2 border-gray-300"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity + 1)
+                            updateQuantity(item.productId, item.size, item.quantity + 1)
                           }
                         >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                          <Plus className="w-7 h-7 p-2" />
+                        </button>
                       </div>
                     </div>
                   </div>

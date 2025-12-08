@@ -271,18 +271,18 @@ export default function ProductDetails() {
                 <div className="flex items-center gap-3 border-2 border-gray-300 rounded px-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-gray-100 rounded transition-colors"
+                    className=" hover:bg-gray-100 transition-colors border-r-2 pr-2 py-1 border-gray-300"
                   >
-                    <Minus className="w-5 h-5" />
+                    <Minus className="w-9 h-9 p-2" />
                   </button>
                   <span className="text-lg font-semibold w-12 text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-gray-100 rounded transition-colors"
+                    className=" hover:bg-gray-100 transition-colors border-l-2 pl-2 py-1 border-gray-300"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-9 h-9 p-2" />
                   </button>
                 </div>
 
