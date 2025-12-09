@@ -1,6 +1,6 @@
 'use client'
 
-import type React from 'react'
+import React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DialogFooter } from '@/components/ui/dialog'
-import { Plus } from 'lucide-react'
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import type { CreateCategoryType, GetCategoryType } from '@/utils/type'
 import { createCategory, fetchCategories, updateCategory } from '@/utils/api'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
@@ -31,6 +31,23 @@ import {
 import { Popup } from '@/utils/popup'
 import { CustomCombobox } from '@/utils/custom-combobox'
 
+interface GroupedCategory {
+  head: GetCategoryType
+  children: GetCategoryType[]
+}
+
+function groupCategoriesByHead(
+  categories: GetCategoryType[]
+): GroupedCategory[] {
+  const heads = categories.filter((cat) => cat.isCategoryHead === true)
+  return heads.map((head) => ({
+    head,
+    children: categories.filter(
+      (cat) => cat.categoryHeadId === head.id && cat.isCategoryHead === false
+    ),
+  }))
+}
+
 const Categories = () => {
   useInitializeUser()
   const [userData] = useAtom(userDataAtom)
@@ -39,9 +56,9 @@ const Categories = () => {
   const router = useRouter()
 
   // State for dialog visibility
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [expandedHeads, setExpandedHeads] = useState<Set<number>>(new Set())
 
   const [editingCategory, setEditingCategory] =
     useState<GetCategoryType | null>(null)
@@ -120,6 +137,19 @@ const Categories = () => {
     setIsPopupOpen(true)
   }, [])
 
+  const toggleExpanded = (headId: number | undefined) => {
+    if (headId === undefined) return
+    setExpandedHeads((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(headId)) {
+        newSet.delete(headId)
+      } else {
+        newSet.add(headId)
+      }
+      return newSet
+    })
+  }
+
   // Handle form submission
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -166,6 +196,9 @@ const Categories = () => {
     }))
   }
 
+  const groupedCategories = groupCategoriesByHead(categories)
+  let slNo = 1
+
   return (
     <div className="p-6 space-y-6">
       {/* Header with title and add button */}
@@ -197,6 +230,7 @@ const Categories = () => {
         <Table>
           <TableHeader className="bg-blue-100">
             <TableRow>
+              <TableHead className="w-10"></TableHead>
               <TableHead>Sl No</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Category Type</TableHead>
@@ -207,44 +241,96 @@ const Categories = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   Loading categories...
                 </TableCell>
               </TableRow>
-            ) : categories.length === 0 ? (
+            ) : groupedCategories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   No categories found
                 </TableCell>
               </TableRow>
             ) : (
-              categories.map((category, index) => (
-                <TableRow key={category.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{category.name}</TableCell>
-                  <TableCell>{category.categoryType}</TableCell>
-                  <TableCell>
-                    {category.isCategoryHead ? (
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-                        Yes
-                      </span>
-                    ) : (
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
-                        No
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(category)}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              groupedCategories.map((group) => {
+                const isExpanded =
+                  group.head.id !== undefined &&
+                  expandedHeads.has(group.head.id)
+                const headSlNo = slNo
+                slNo += 1
+
+                return (
+                  <React.Fragment key={`group-${group.head.id}`}>
+                    {/* Category Head Row */}
+                    <TableRow className="bg-blue-50 hover:bg-blue-100 font-semibold">
+                      <TableCell>
+                        <button
+                          onClick={() => toggleExpanded(group.head.id)}
+                          className="p-0 hover:bg-blue-200 rounded"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-5 h-5" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5" />
+                          )}
+                        </button>
+                      </TableCell>
+                      <TableCell>{headSlNo}</TableCell>
+                      <TableCell>{group.head.name}</TableCell>
+                      <TableCell>{group.head.categoryType}</TableCell>
+                      <TableCell>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                          Yes
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(group.head)}
+                        >
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Child Category Rows */}
+                    {isExpanded &&
+                      group.children.map((child) => {
+                        const childSlNo = slNo
+                        slNo += 1
+
+                        return (
+                          <TableRow
+                            key={`child-${child.id}`}
+                            className="bg-white hover:bg-gray-50"
+                          >
+                            <TableCell></TableCell>
+                            <TableCell className="pl-12">{childSlNo}</TableCell>
+                            <TableCell className="pl-12">
+                              {child.name}
+                            </TableCell>
+                            <TableCell>{child.categoryType}</TableCell>
+                            <TableCell>
+                              <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                                No
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(child)}
+                              >
+                                Edit
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                  </React.Fragment>
+                )
+              })
             )}
           </TableBody>
         </Table>
