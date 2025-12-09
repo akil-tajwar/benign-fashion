@@ -13,6 +13,7 @@ export const categorySchema = z.object({
   name: z.string().min(1).max(100),
   categoryType: z.enum(['men', 'kids']),
   isCategoryHead: z.boolean().default(false),
+  categoryHeadId: z.number().optional().nullable(),
 });
 
 export const createCategoryController = async (req: Request, res: Response, next: NextFunction) => {

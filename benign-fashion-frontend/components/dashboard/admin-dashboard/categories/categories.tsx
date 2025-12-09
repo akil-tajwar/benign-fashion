@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Popup } from '@/utils/popup'
+import { CustomCombobox } from '@/utils/custom-combobox'
 
 const Categories = () => {
   useInitializeUser()
@@ -51,6 +52,7 @@ const Categories = () => {
     name: '',
     categoryType: 'men',
     isCategoryHead: false,
+    categoryHeadId: null,
   })
 
   // State for table data
@@ -101,6 +103,7 @@ const Categories = () => {
       name: '',
       categoryType: 'men',
       isCategoryHead: false,
+      categoryHeadId: null,
     })
     setEditingCategory(null)
     setIsPopupOpen(false)
@@ -112,6 +115,7 @@ const Categories = () => {
       name: category.name,
       categoryType: category.categoryType,
       isCategoryHead: category.isCategoryHead,
+      categoryHeadId: category.categoryHeadId,
     })
     setIsPopupOpen(true)
   }, [])
@@ -127,6 +131,7 @@ const Categories = () => {
           name: formData.name,
           categoryType: formData.categoryType,
           isCategoryHead: formData.isCategoryHead,
+          categoryHeadId: formData.categoryHeadId,
         }
 
         if (editingCategory) {
@@ -150,6 +155,16 @@ const Categories = () => {
     },
     [formData, token, fetchCategoriesData, resetForm, editingCategory]
   )
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      product: {
+        ...prev,
+        [name]: Number(value),
+      },
+    }))
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -296,6 +311,38 @@ const Categories = () => {
                 Is Category Head
               </Label>
             </div>
+
+            {!formData.isCategoryHead && (
+              <div className="space-y-2">
+                <Label htmlFor="categoryHeadId">Category Head*</Label>
+                <CustomCombobox
+                  items={categories
+                    .filter((cat) => cat.isCategoryHead === true) // only heads
+                    .map((cat) => ({
+                      id: cat.id?.toString() || '0',
+                      name: cat.name,
+                    }))}
+                  value={
+                    formData.categoryHeadId
+                      ? {
+                          id: formData.categoryHeadId.toString(),
+                          name:
+                            categories.find(
+                              (c) => c.id === formData.categoryHeadId
+                            )?.name || '',
+                        }
+                      : null
+                  }
+                  onChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      categoryHeadId: value ? Number(value.id) : null,
+                    }))
+                  }
+                  placeholder="Select Category Head"
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter>

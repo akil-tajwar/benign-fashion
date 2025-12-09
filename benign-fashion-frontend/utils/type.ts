@@ -62,6 +62,7 @@ export const categorySchema = z.object({
   name: z.string().min(1).max(100),
   categoryType: z.enum(['men', 'kids']),
   isCategoryHead: z.boolean().default(false),
+  categoryHeadId: z.number().optional().nullable(),
 });
 
 export type CreateCategoryType = z.infer<typeof categorySchema>;

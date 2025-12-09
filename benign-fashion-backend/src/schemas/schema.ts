@@ -65,6 +65,7 @@ export const categoriesModel = mysqlTable("categories", {
   name: varchar("name", { length: 100 }).notNull(),
   categoryType: mysqlEnum("category_type", ["men", "kids"]),
   isCategoryHead: boolean("is_category_head").notNull(),
+  categoryHeadId: int("category_head_id"),
 });
 
 // ================= PRODUCTS =================
