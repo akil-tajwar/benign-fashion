@@ -168,13 +168,25 @@ const Products = () => {
   }
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      product: {
-        ...prev.product,
-        [name]: Number(value),
-      },
-    }))
+    if (name === 'categoryId') {
+      // Reset subcategory when category changes
+      setFormData((prev) => ({
+        ...prev,
+        product: {
+          ...prev.product,
+          categoryId: Number(value),
+          subCategoryId: 0, // Reset subcategory
+        },
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        product: {
+          ...prev.product,
+          [name]: Number(value),
+        },
+      }))
+    }
   }
 
   const handlePhotoFileChange = (index: number, files: FileList | null) => {
@@ -506,7 +518,11 @@ const Products = () => {
               <Label htmlFor="subCategoryId">Sub Category*</Label>
               <CustomCombobox
                 items={subCategories
-                  .filter((cat) => cat.id !== undefined)
+                  .filter(
+                    (cat) =>
+                      cat.id !== undefined &&
+                      cat.categoryHeadId === formData.product.categoryId
+                  )
                   .map((cat) => ({
                     id: cat?.id?.toString() || '0',
                     name: cat.name || 'Unnamed item',
@@ -590,7 +606,9 @@ const Products = () => {
                     <Checkbox
                       id={size}
                       name="availableSize"
-                      checked={formData.product.availableSize.includes(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')}
+                      checked={formData.product.availableSize.includes(
+                        size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
+                      )}
                       onCheckedChange={(checked) =>
                         setFormData((prev) => {
                           const sizes = new Set(prev.product.availableSize)
