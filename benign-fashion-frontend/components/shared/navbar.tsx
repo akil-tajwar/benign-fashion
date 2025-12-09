@@ -99,14 +99,14 @@ export default function Navbar({
             {/* CATEGORY HOVER MENU */}
             <div className="hidden lg:flex gap-6 text-gray-700 font-medium relative">
               <p
-                onMouseEnter={() => setHoverMenu('Men')}
+                onMouseEnter={() => setHoverMenu('men')}
                 onMouseLeave={() => setHoverMenu(null)}
                 className="cursor-pointer hover:text-blue-600"
               >
                 Men
               </p>
               <p
-                onMouseEnter={() => setHoverMenu('Kids')}
+                onMouseEnter={() => setHoverMenu('kids')}
                 onMouseLeave={() => setHoverMenu(null)}
                 className="cursor-pointer hover:text-blue-600"
               >
@@ -115,9 +115,19 @@ export default function Navbar({
               <Link href={'/dashboard/categories'}>Dashboard</Link>
 
               {/* HOVER DROPDOWN */}
-              {hoverMenu && (
-                <div
-                  className="
+              {hoverMenu &&
+                (() => {
+                  // Filter category heads for the current menu type
+                  const categoryHeads = categories.filter(
+                    (cat) =>
+                      cat.isCategoryHead &&
+                      cat.categoryHeadId === null &&
+                      cat.categoryType === hoverMenu
+                  )
+
+                  return (
+                    <div
+                      className="
                 absolute 
                 top-[180%] 
                 left-1/2 -translate-x-1/2
@@ -129,32 +139,39 @@ export default function Navbar({
                 animate-slideDown
                 z-50
               "
-                  onMouseEnter={() => setHoverMenu(hoverMenu)}
-                  onMouseLeave={() => setHoverMenu(null)}
-                >
-                  {[1, 2, 3].map((col) => (
-                    <div key={col}>
-                      <h3 className="font-semibold text-gray-800 mb-3">
-                        {hoverMenu} Category {col}
-                      </h3>
-                      <ul className="space-y-2 text-gray-600">
-                        <li className="hover:text-blue-600 cursor-pointer">
-                          Item 1
-                        </li>
-                        <li className="hover:text-blue-600 cursor-pointer">
-                          Item 2
-                        </li>
-                        <li className="hover:text-blue-600 cursor-pointer">
-                          Item 3
-                        </li>
-                        <li className="hover:text-blue-600 cursor-pointer">
-                          Item 4
-                        </li>
-                      </ul>
+                      onMouseEnter={() => setHoverMenu(hoverMenu)}
+                      onMouseLeave={() => setHoverMenu(null)}
+                    >
+                      {categoryHeads.map((categoryHead) => {
+                        // Get subcategories for this category head
+                        const subCategories = categories.filter(
+                          (cat) =>
+                            !cat.isCategoryHead &&
+                            cat.categoryHeadId === categoryHead.id
+                        )
+
+                        return (
+                          <div key={categoryHead.id}>
+                            <h3 className="font-semibold text-lg text-gray-800 mb-3">
+                              {categoryHead.name}
+                            </h3>
+                            <ul className="space-y-2 text-gray-600">
+                              {subCategories.map((subCat) => (
+                                <li
+                                  key={subCat.id}
+                                  onClick={() => onCategoryClick(subCat.id!)}
+                                  className="hover:text-blue-600 cursor-pointer pl-3"
+                                >
+                                  {subCat.name}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )
+                      })}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )
+                })()}
             </div>
 
             {/* RIGHT SECTION */}

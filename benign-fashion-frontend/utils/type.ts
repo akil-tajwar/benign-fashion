@@ -58,7 +58,7 @@ const SignInResponseSchema = z.object({
 export type SignInResponse = z.infer<typeof SignInResponseSchema>
 
 export const categorySchema = z.object({
-  id: z.number().int().optional(),     // auto-increment, so optional
+  id: z.number().int().optional(),
   name: z.string().min(1).max(100),
   categoryType: z.enum(['men', 'kids']),
   isCategoryHead: z.boolean().default(false),
