@@ -20,6 +20,7 @@ export default function ProductDetails() {
   const { addToCart } = useCart()
   const { toast } = useToast()
   const id = Number(params.id)
+  console.log("🚀 ~ ProductDetails ~ id:", id)
   const [token] = useAtom(tokenAtom)
   const [product, setProduct] = useState<GetProductType | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<GetProductType[]>([])
@@ -28,11 +29,9 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
 
-  const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+  const ALL_SIZES = ['M', 'L', 'XL', 'XXL']
 
   const getProductbyId = useCallback(async () => {
-    if (!token) return
-
     const product = await fetchProductById(token, id)
 
     if (product.error || !product.data) {
@@ -43,6 +42,7 @@ export default function ProductDetails() {
       })
     } else {
       setProduct(product.data)
+      console.log("🚀 ~ ProductDetails ~ product.data:", product.data)
     }
   }, [token, id, toast])
 
@@ -217,7 +217,7 @@ export default function ProductDetails() {
                 Product Code: {product.product.productCode}
               </p>
               <p className="text-sm text-muted-foreground">
-                Category: {product.categoryName}
+                Category: {product.product.subCategoryName}
               </p>
             </div>
 
@@ -280,7 +280,7 @@ export default function ProductDetails() {
 
             {/* Quantity & Add to Cart */}
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-3 border-2 border-gray-300 rounded px-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}

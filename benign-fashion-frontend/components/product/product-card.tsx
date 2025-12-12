@@ -13,7 +13,7 @@ interface ProductCardProps {
   onProductClick: (product: GetProductType) => void
 }
 
-const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const ALL_SIZES = ['M', 'L', 'XL', 'XXL']
 
 export default function ProductCard({
   product,
@@ -86,7 +86,7 @@ export default function ProductCard({
           </h3>
 
           <p className="text-xs text-gray-500 mb-3 line-clamp-1">
-            {product.categoryName}
+            {product.product.subCategoryName}
           </p>
 
           <div className="flex items-center justify-between mb-3 mt-auto">
@@ -149,7 +149,7 @@ export default function ProductCard({
           >
             {ALL_SIZES.map((size) => {
               const isAvailable = product.product?.availableSize?.includes(
-                size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
+                size as 'M' | 'L' | 'XL' | 'XXL'
               )
 
               return (

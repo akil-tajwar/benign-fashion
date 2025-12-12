@@ -100,6 +100,38 @@ export const productSchema = z.object({
 export type CreateProductType = z.infer<typeof productSchema>
 export type GetProductType = z.infer<typeof productSchema>
 
+export const ordersSchema = z.object({
+  orderMaster: z.object({
+    id: z.number().optional(),
+    userId: z.number().nullable().optional(),
+    fullName: z.string().max(255),
+    division: z.string().max(15),
+    district: z.string().max(15),
+    subDistrict: z.string().max(15),
+    address: z.string().max(100),
+    phone: z.string().max(14),
+    email: z.string().max(50).nullable().optional(),
+    status: z.enum(['pending', 'delivered']).default('pending'),
+    method: z.enum(['bkash', 'nagad', 'rocket']),
+    transactionId: z.string().max(255).nullable().optional(),
+    totalAmount: z.number(),
+    createdAt: z.string().optional(),
+  }),
+
+  orderDetails: z.array(
+    z.object({
+      id: z.number().optional(),
+      productId: z.number(),
+      size: z.enum(['M', 'L', 'XL', 'XXL']),
+      quantity: z.number().default(1),
+      amount: z.number(),
+      createdAt: z.string().optional(),
+    })
+  ),
+})
+export type CreateOrderType = z.infer<typeof ordersSchema>
+export type GetOrderType = z.infer<typeof ordersSchema>
+
 // ✅ Define User type (based on your DB schema)
 export type Users = {
   userId: number

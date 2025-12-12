@@ -98,22 +98,33 @@ export const photosModel = mysqlTable("photos", {
 });
 
 // ================= ORDERS =================
-export const ordersModel = mysqlTable("orders", {
+export const ordersMasterModel = mysqlTable("orders_master", {
   id: int("id").primaryKey().autoincrement(),
-  userId: int("user_id")
-    .notNull()
-    .references(() => userModel.userId, { onDelete: "cascade" }),
+  userId: int("user_id").references(() => userModel.userId, {
+    onDelete: "set null",
+  }),
+  fullName: varchar("full_name", { length: 255 }),
+  division: varchar("division", { length: 15 }),
+  district: varchar("district", { length: 15 }),
+  subDistrict: varchar("sub_district", { length: 15 }),
+  address: varchar("address", { length: 100 }),
+  phone: varchar("phone", { length: 14 }),
+  email: varchar("email", { length: 50 }),
+  status: mysqlEnum("status", ["pending", "delivered"]).default("pending"),
+  method: mysqlEnum("method", ["bkash", "nagad", "rocket"]).notNull(),
+  transactionId: varchar("transaction_id", { length: 255 }),
+  totalAmount: int("total_amount").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const odersDetailsModel = mysqlTable("order_details", {
+  id: int("id").primaryKey().autoincrement(),
   productId: int("product_id")
     .notNull()
     .references(() => productsModel.id, { onDelete: "cascade" }),
   size: mysqlEnum("size", ["M", "L", "XL", "XXL"]).notNull(),
   quantity: int("quantity").notNull().default(1),
-  status: mysqlEnum("status", ["pending", "paid", "delivered"]).default(
-    "pending"
-  ),
-  method: mysqlEnum("method", ["cash", "bkash", "nagad", "rocket"]).notNull(),
-  transactionId: varchar("transaction_id", { length: 255 }),
-  totalAmount: int("total_amount").notNull(),
+  amount: int("amount").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -124,7 +135,6 @@ export const userRelations = relations(userModel, ({ one, many }) => ({
     fields: [userModel.roleId],
     references: [roleModel.roleId],
   }),
-  orders: many(ordersModel),
   userRoles: many(userRolesModel),
 }));
 
@@ -183,16 +193,22 @@ export const categoryRelations = relations(categoriesModel, ({ many }) => ({
   products: many(productsModel),
 }));
 
-export const orderRelations = relations(ordersModel, ({ one }) => ({
+export const orderMasterRelations = relations(ordersMasterModel, ({ one }) => ({
   user: one(userModel, {
-    fields: [ordersModel.userId],
+    fields: [ordersMasterModel.userId],
     references: [userModel.userId],
   }),
-  product: one(productsModel, {
-    fields: [ordersModel.productId],
-    references: [productsModel.id],
-  }),
 }));
+
+export const orderDetailsRelations = relations(
+  odersDetailsModel,
+  ({ one }) => ({
+    product: one(productsModel, {
+      fields: [odersDetailsModel.productId],
+      references: [productsModel.id],
+    }),
+  })
+);
 
 export const photoRelations = relations(photosModel, ({ one }) => ({
   product: one(productsModel, {
@@ -216,5 +232,7 @@ export type Category = typeof categoriesModel.$inferSelect;
 export type NewCategory = typeof categoriesModel.$inferInsert;
 export type Product = typeof productsModel.$inferSelect;
 export type NewProduct = typeof productsModel.$inferInsert;
-export type Order = typeof ordersModel.$inferSelect;
-export type NewOrder = typeof ordersModel.$inferInsert;
+export type OrdersMaster = typeof ordersMasterModel.$inferInsert;
+export type NewOrdersMaster = typeof ordersMasterModel.$inferInsert;
+export type OrdersDetails = typeof odersDetailsModel.$inferSelect;
+export type NewOrdersDetails = typeof odersDetailsModel.$inferInsert;

@@ -5,12 +5,9 @@ import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/use-cart'
 import { ShoppingCart, Plus, Minus, X, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
-interface CartSidebarProps {
-  onCheckoutClick?: () => void
-}
-
-export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
+export default function CartSidebar() {
   const {
     isCartOpen,
     setIsCartOpen,
@@ -19,6 +16,7 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
     removeFromCart,
     getTotalPrice,
   } = useCart()
+  const router = useRouter()
 
   if (!isCartOpen) return null
 
@@ -90,7 +88,11 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
                         <button
                           className=" hover:bg-gray-100 transition-colors border-r-2 px-2 border-gray-300"
                           onClick={() =>
-                            updateQuantity(item.productId, item.size, item.quantity - 1)
+                            updateQuantity(
+                              item.productId,
+                              item.size,
+                              item.quantity - 1
+                            )
                           }
                         >
                           <Minus className="w-7 h-7 p-2" />
@@ -101,7 +103,11 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
                         <button
                           className=" hover:bg-gray-100 transition-colors border-l-2 px-2 border-gray-300"
                           onClick={() =>
-                            updateQuantity(item.productId, item.size, item.quantity + 1)
+                            updateQuantity(
+                              item.productId,
+                              item.size,
+                              item.quantity + 1
+                            )
                           }
                         >
                           <Plus className="w-7 h-7 p-2" />
@@ -122,10 +128,8 @@ export default function CartSidebar({ onCheckoutClick }: CartSidebarProps) {
           </div>
           <Button
             onClick={() => {
+              router.push('/checkout')
               setIsCartOpen(false)
-              if (onCheckoutClick) {
-                onCheckoutClick()
-              }
             }}
             disabled={cartItems.length === 0}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"

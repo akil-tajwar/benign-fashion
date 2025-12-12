@@ -2,41 +2,40 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-// import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const sliderImages = [
   {
     id: 1,
-    src: '/organic-vegetables-and-fruits-banner.jpg',
-    alt: 'Fresh Organic Produce',
-    title: '100% Natural & Organic',
+    src: '/men1.webp',
+    alt: 'Very New Cloths',
+    title: 'Authentic & Pure',
     subtitle:
-      'Discover the finest selection of organic spices, natural products, and healthy foods delivered fresh to your doorstep.',
+      ' Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, et?',
   },
   {
     id: 2,
-    src: '/organic-spices-and-herbs-banner.jpg',
+    src: '/men2.jpg',
     alt: 'Organic Spices & Herbs',
-    title: 'Premium Organic Spices',
+    title: 'Random Title',
     subtitle:
-      'Enhance your cooking with our collection of authentic, organic spices sourced directly from farmers.',
+      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad officiis molestias culpa, illo harum illum doloremque.',
   },
   {
     id: 3,
-    src: '/organic-dairy-banner.png',
-    alt: 'Organic Dairy Products',
-    title: 'Farm Fresh Dairy',
+    src: '/kids1.webp',
+    alt: 'Kids cloths and all',
+    title: 'Kids cloths Collection',
     subtitle:
-      'Pure, organic dairy products from grass-fed cows, delivered fresh to maintain quality and taste.',
+      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad.',
   },
   {
     id: 4,
-    src: '/organic-meat-and-poultry-banner.jpg',
-    alt: 'Organic Meat & Poultry',
-    title: 'Free-Range & Organic',
+    src: '/kids2.webp',
+    alt: 'random title generated',
+    title: 'random title generated',
     subtitle:
-      'Ethically sourced, hormone-free meat and poultry from certified organic farms.',
+      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad officiis molestias culpa, illo harum illum doloremque.',
   },
 ]
 
@@ -66,37 +65,38 @@ export default function HeroSlider() {
 
   return (
     <section
-      
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="max-w-11/12 mx-auto px-4">
-        <div className="relative h-[90vh] rounded-lg overflow-hidden">
-          {/* Slider Images */}
-          <div className="relative w-full h-full">
-            {sliderImages.map((slide, index) => (
+      {/* Remove your max-w-11/12 wrapper — slider must be full width */}
+      <div className="w-full">
+        <div className="relative w-full h-[90vh] overflow-hidden">
+          {/* SLIDER TRACK */}
+          <div
+            className="flex h-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {sliderImages.map((slide) => (
               <div
                 key={slide.id}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
-                }`}
+                className="w-full h-full flex-shrink-0 relative"
+                style={{ minWidth: '100%' }} // <-- IMPORTANT
               >
                 <Image
-                  src={slide.src || '/placeholder.svg'}
+                  src={slide.src}
                   alt={slide.alt}
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-50" />
-                <div className="absolute inset-0 flex items-center justify-center text-center text-white">
+
+                <div className="absolute inset-0 bg-black/40"></div>
+
+                <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
                   <div className="max-w-2xl">
                     <h1 className="text-4xl md:text-6xl font-bold mb-4">
                       {slide.title}
                     </h1>
                     <p className="text-xl mb-8">{slide.subtitle}</p>
-                    {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
-                      Shop Organic Now
-                    </Button> */}
                   </div>
                 </div>
               </div>
@@ -107,9 +107,9 @@ export default function HeroSlider() {
           <button
             onClick={prevSlide}
             className={`absolute left-4 top-1/2 transform -translate-y-1/2 
-              bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg
-              transition-all duration-500 ease-in-out
-              ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-5'}`}
+          bg-white/80 hover:bg-white rounded-full p-2 shadow-lg
+          transition-all duration-500
+          ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-5'}`}
           >
             <ChevronLeft className="w-6 h-6 text-gray-800" />
           </button>
@@ -118,22 +118,21 @@ export default function HeroSlider() {
           <button
             onClick={nextSlide}
             className={`absolute right-4 top-1/2 transform -translate-y-1/2 
-              bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg
-              transition-all duration-500 ease-in-out
-              ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-5'}`}
+          bg-white/80 hover:bg-white rounded-full p-2 shadow-lg
+          transition-all duration-500
+          ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-5'}`}
           >
             <ChevronRight className="w-6 h-6 text-gray-800" />
           </button>
 
-          {/* Slide Indicators */}
+          {/* Indicators */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {sliderImages.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  index === currentSlide ? 'bg-white' : 'bg-white bg-opacity-50'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all
+            ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`}
               />
             ))}
           </div>
