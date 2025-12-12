@@ -65,11 +65,9 @@ export const createProduct = async (data: CreateProductWithFiles) => {
 // GET ALL PRODUCTS
 // ======================================================
 
-export const getProducts = async () => {
-  // Proper alias for subcategories
+export const getProducts = async (subCategoryId?: number) => {
   const subcat = alias(categoriesModel, "subcat");
 
-  // Fetch products with category + subcategory names
   const products = await db
     .select({
       id: productsModel.id,
@@ -85,9 +83,11 @@ export const getProducts = async () => {
 
       categoryId: productsModel.categoryId,
       categoryName: categoriesModel.name,
+      categoryType: categoriesModel.categoryType, // ✅ added
 
       subCategoryId: productsModel.subCategoryId,
       subCategoryName: subcat.name,
+      subCategoryType: subcat.categoryType, // ✅ optional (only if you want)
     })
     .from(productsModel)
     .innerJoin(
@@ -95,18 +95,18 @@ export const getProducts = async () => {
       eq(productsModel.categoryId, categoriesModel.id)
     )
     .innerJoin(subcat, eq(productsModel.subCategoryId, subcat.id))
+    .where(
+      subCategoryId ? eq(productsModel.subCategoryId, subCategoryId) : undefined
+    )
     .execute();
 
-  // Get all product IDs
   const productIds = products.map((p) => p.id);
 
-  // Fetch photos for these products
   const photos = await db
     .select()
     .from(photosModel)
     .where(inArray(photosModel.productId, productIds));
 
-  // Return data in GetProductType format
   return products.map((p) => ({
     product: {
       id: p.id,
@@ -121,8 +121,12 @@ export const getProducts = async () => {
       isFlashSale: p.isFlashSale,
       availableSize: p.availableSize,
       createdAt: p.createdAt,
+
       categoryName: p.categoryName,
+      categoryType: p.categoryType,
+
       subCategoryName: p.subCategoryName,
+      subCategoryType: p.subCategoryType,
     },
 
     photoUrls: photos

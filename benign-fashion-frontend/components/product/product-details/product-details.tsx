@@ -10,9 +10,9 @@ import { useToast } from '@/hooks/use-toast'
 import { ChevronRight, Minus, Plus } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '../ui/button'
-import size from '../../public/size.jpeg'
+import size from '../../../public/size.jpeg'
 import { useCart } from '@/hooks/use-cart'
+import { Button } from '@/components/ui/button'
 
 export default function ProductDetails() {
   useInitializeUser()

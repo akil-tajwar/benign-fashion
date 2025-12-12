@@ -70,7 +70,11 @@ export const getProductsController = async (
   next: NextFunction
 ) => {
   try {
-    const products = await getProducts();
+    const { subCategoryId } = req.params;
+    const id = subCategoryId ? Number(subCategoryId) : undefined;
+
+    const products = await getProducts(id);
+
     res.json(products);
   } catch (err) {
     next(err);

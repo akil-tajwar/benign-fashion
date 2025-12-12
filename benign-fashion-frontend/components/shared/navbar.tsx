@@ -52,7 +52,6 @@ export default function Navbar({
   onProductClick,
 }: NavbarProps) {
   const [categories, setCategories] = useState<GetCategoryType[]>([])
-  const [products, setProducts] = useState<GetProductType[]>([])
   const [token] = useAtom(tokenAtom)
 
   const [hoverMenu, setHoverMenu] = useState<string | null>(null)
@@ -63,14 +62,12 @@ export default function Navbar({
 
   useEffect(() => {
     const loadData = async () => {
-      if (!token) return
       try {
         const [catRes, prodRes] = await Promise.all([
           fetchCategories(token),
           fetchProducts(token),
         ])
         if (catRes?.data) setCategories(catRes.data)
-        if (prodRes?.data) setProducts(prodRes.data)
       } catch (err) {
         console.error('Failed loading data', err)
       }
@@ -98,20 +95,20 @@ export default function Navbar({
 
             {/* CATEGORY HOVER MENU */}
             <div className="hidden lg:flex gap-6 text-gray-700 font-medium relative">
-              <p
+              <Link
+                href={'/men-products'}
                 onMouseEnter={() => setHoverMenu('men')}
-                onMouseLeave={() => setHoverMenu(null)}
                 className="cursor-pointer hover:text-blue-600"
               >
                 Men
-              </p>
-              <p
+              </Link>
+              <Link
+                href={'/kids-products'}
                 onMouseEnter={() => setHoverMenu('kids')}
-                onMouseLeave={() => setHoverMenu(null)}
                 className="cursor-pointer hover:text-blue-600"
               >
                 Kids
-              </p>
+              </Link>
               <Link href={'/dashboard/categories'}>Dashboard</Link>
 
               {/* HOVER DROPDOWN */}
@@ -162,7 +159,11 @@ export default function Navbar({
                                   onClick={() => onCategoryClick(subCat.id!)}
                                   className="hover:text-blue-600 cursor-pointer pl-3"
                                 >
-                                  {subCat.name}
+                                  <Link
+                                    href={`/category-products/${subCat.id}`}
+                                  >
+                                    {subCat.name}
+                                  </Link>
                                 </li>
                               ))}
                             </ul>
