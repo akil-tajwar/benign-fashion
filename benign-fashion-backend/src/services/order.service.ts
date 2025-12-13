@@ -1,87 +1,102 @@
-import { db } from "../config/database";
-import { orders, products, userModel } from "../schemas";
-import { eq } from "drizzle-orm";
 
+import { eq, desc } from 'drizzle-orm'
+import { db } from '../config/database'
+import { ordersDetailsModel, ordersMasterModel } from '../schemas'
+import { CreateOrderType } from '../controllers/order.controller'
+
+/**
+ * CREATE ORDER (MASTER + DETAILS)
+ */
 export const createOrder = async (
-  userId: number,
-  items: { productId: number; qty: number }[]
+  payload: CreateOrderType
 ) => {
-  if (!items || items.length === 0) {
-    throw new Error("Order must contain at least one item");
-  }
+  return await db.transaction(async (trx) => {
+    // 1️⃣ Insert order master
+    const [master] = await trx
+      .insert(ordersMasterModel)
+      .values({
+        userId: payload.orderMaster.userId ?? null,
+        fullName: payload.orderMaster.fullName,
+        division: payload.orderMaster.division,
+        district: payload.orderMaster.district,
+        address: payload.orderMaster.address,
+        phone: payload.orderMaster.phone,
+        email: payload.orderMaster.email ?? null,
+        status: payload.orderMaster.status,
+        method: payload.orderMaster.method,
+        transactionId: payload.orderMaster.transactionId ?? null,
+        totalAmount: payload.orderMaster.totalAmount,
+      })
+      .$returningId()
 
-  let totalOrderAmount = 0;
+    const ordersMasterId = master.id
 
-  // loop through items
-  for (const item of items) {
-    const [product] = await db
-      .select()
-      .from(products)
-      .where(eq(products.id, item.productId));
-
-    if (!product) throw new Error(`Product ${item.productId} not found`);
-    if (product.stock == null || product.stock < item.qty)
-      throw new Error(`Not enough stock for product ${item.productId}`);
-
-    const lineAmount = product.price * item.qty;
-    totalOrderAmount += lineAmount;
-
-    // deduct stock
-    await db
-      .update(products)
-      .set({ stock: product.stock - item.qty })
-      .where(eq(products.id, item.productId));
-
-    // insert row in orders
-    await db.insert(orders).values({
-      userId,
+    // 2️⃣ Insert order details
+    const detailsData = payload.orderDetails.map((item) => ({
+      ordersMasterId,
       productId: item.productId,
-      productQuantity: item.qty,
-      status: "pending",
-      totalAmount: lineAmount,
-    });
-  }
+      size: item.size,
+      quantity: item.quantity,
+      amount: item.amount,
+    }))
 
-  return { message: "Order created successfully", totalOrderAmount };
-};
+    await trx.insert(ordersDetailsModel).values(detailsData)
 
-// get all orders - admin
-// export const getAllOrders = async () => {
-//   return await db.select().from(orders);
-// }
-export const getAllOrders = async () => {
-  return await db
-    .select({
-      id: orders.id,
-      userId: orders.userId,
-      productId:orders.productId,
-      productQuantity: orders.productQuantity,
-      totalAmount: orders.totalAmount,
-      status: orders.status,
-      createdAt: orders.createdAt,
-      userName: userModel.username, // or userModel.username
-    })
-    .from(orders)
-    .leftJoin(userModel, eq(orders.userId, userModel.userId))
+    return {
+      ordersMasterId,
+      message: 'Order created successfully',
+    }
+  })
 }
 
-
-// get orders by user
-
-export const getOrdersByUser = async (userId: number) => {
-  return await db
+/**
+ * GET ALL ORDERS (MASTER + DETAILS)
+ */
+export const getAllOrders = async () => {
+  const masters = await db
     .select()
-    .from(orders)
-    .where(eq(orders.userId, userId));
-};
+    .from(ordersMasterModel)
+    .orderBy(desc(ordersMasterModel.createdAt))
 
-export const updateOrderStatus = async (orderId: number, status: string) => {
-  const validStatuses = ["pending", "paid", "delivered", "cancelled"];
-  if (!validStatuses.includes(status)) {
-    throw new Error("Invalid status");
-  }
+  const orders = await Promise.all(
+    masters.map(async (master) => {
+      const details = await db
+        .select()
+        .from(ordersDetailsModel)
+        .where(eq(ordersDetailsModel.ordersMasterId, master.id))
 
-  await db.update(orders).set({ status: status as "pending" | "paid" | "delivered" | "cancelled" }).where(eq(orders.id, orderId));
+      return {
+        orderMaster: master,
+        orderDetails: details,
+      }
+    })
+  )
 
-  return { message: `Order ${orderId} updated to ${status}` };
-};
+  return orders
+}
+
+export const getOrdersByUserId = async (
+  userId: number
+) => {
+  const masters = await db
+    .select()
+    .from(ordersMasterModel)
+    .where(eq(ordersMasterModel.userId, userId))
+    .orderBy(desc(ordersMasterModel.createdAt))
+
+  const orders = await Promise.all(
+    masters.map(async (master) => {
+      const details = await db
+        .select()
+        .from(ordersDetailsModel)
+        .where(eq(ordersDetailsModel.ordersMasterId, master.id))
+
+      return {
+        orderMaster: master,
+        orderDetails: details,
+      }
+    })
+  )
+
+  return orders
+}

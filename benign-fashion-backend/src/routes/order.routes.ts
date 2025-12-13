@@ -1,18 +1,10 @@
-import { Router } from "express";
-import {
-  createOrderController,
-  getAllOrdersController,
-  getOrdersByUserController,
-  updateOrderStatusController,
-} from "../controllers/order.controller";
-import { authenticateUser } from "../middlewares/auth.middleware";
+import { Router } from 'express'
+import { createOrderController, getAllOrdersController } from '../controllers/order.controller'
 
+const router = Router()
 
-const router = Router();
+router.post('/create', createOrderController)
+router.get('/getAll', getAllOrdersController)
+router.get('/getByUserId/:userId', getAllOrdersController)
 
-router.post("/create-orders", authenticateUser, createOrderController);
-router.get("/all-orders", authenticateUser, getAllOrdersController);
-router.get("/get-orders-by-users", authenticateUser, getOrdersByUserController);
-router.put("/update-orders/:id/status", authenticateUser, updateOrderStatusController);
-
-export default router;
+export default router

@@ -106,7 +106,6 @@ export const ordersMasterModel = mysqlTable("orders_master", {
   fullName: varchar("full_name", { length: 255 }),
   division: varchar("division", { length: 15 }),
   district: varchar("district", { length: 15 }),
-  subDistrict: varchar("sub_district", { length: 15 }),
   address: varchar("address", { length: 100 }),
   phone: varchar("phone", { length: 14 }),
   email: varchar("email", { length: 50 }),
@@ -117,8 +116,14 @@ export const ordersMasterModel = mysqlTable("orders_master", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const odersDetailsModel = mysqlTable("order_details", {
+export const ordersDetailsModel = mysqlTable("orders_details", {
   id: int("id").primaryKey().autoincrement(),
+  ordersMasterId: int("orders_master_id").references(
+    () => ordersMasterModel.id,
+    {
+      onDelete: "set null",
+    }
+  ),
   productId: int("product_id")
     .notNull()
     .references(() => productsModel.id, { onDelete: "cascade" }),
@@ -201,11 +206,15 @@ export const orderMasterRelations = relations(ordersMasterModel, ({ one }) => ({
 }));
 
 export const orderDetailsRelations = relations(
-  odersDetailsModel,
+  ordersDetailsModel,
   ({ one }) => ({
     product: one(productsModel, {
-      fields: [odersDetailsModel.productId],
+      fields: [ordersDetailsModel.productId],
       references: [productsModel.id],
+    }),
+    orderMaster: one(ordersMasterModel, {
+      fields: [ordersDetailsModel.ordersMasterId],
+      references: [ordersMasterModel.id],
     }),
   })
 );
@@ -234,5 +243,5 @@ export type Product = typeof productsModel.$inferSelect;
 export type NewProduct = typeof productsModel.$inferInsert;
 export type OrdersMaster = typeof ordersMasterModel.$inferInsert;
 export type NewOrdersMaster = typeof ordersMasterModel.$inferInsert;
-export type OrdersDetails = typeof odersDetailsModel.$inferSelect;
-export type NewOrdersDetails = typeof odersDetailsModel.$inferInsert;
+export type OrdersDetails = typeof ordersDetailsModel.$inferSelect;
+export type NewOrdersDetails = typeof ordersDetailsModel.$inferInsert;

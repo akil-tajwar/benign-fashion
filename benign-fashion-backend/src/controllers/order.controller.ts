@@ -1,74 +1,109 @@
-import { Request, Response, NextFunction } from "express";
-import * as orderService from "../services/order.service";
+import { Request, Response } from 'express'
+import { createOrder, getAllOrders, getOrdersByUserId } from '../services/order.service'
+import { z } from 'zod'
+
+export const ordersSchema = z.object({
+  orderMaster: z.object({
+    id: z.number().optional(),
+    userId: z.number().nullable().optional(),
+    fullName: z.string().max(255),
+    division: z.string().max(15),
+    district: z.string().max(15),
+    address: z.string().max(100),
+    phone: z.string().max(14),
+    email: z.string().max(50).nullable().optional(),
+    status: z.enum(['pending', 'delivered']).default('pending'),
+    method: z.enum(['bkash', 'nagad', 'rocket']),
+    transactionId: z.string().max(255).nullable().optional(),
+    totalAmount: z.number(),
+    createdAt: z.string().optional(),
+  }),
+
+  orderDetails: z.array(
+    z.object({
+      id: z.number().optional(),
+      ordersMasterId: z.number(),
+      productId: z.number(),
+      size: z.enum(['M', 'L', 'XL', 'XXL']),
+      quantity: z.number().default(1),
+      amount: z.number(),
+      createdAt: z.string().optional(),
+    })
+  ),
+})
+export type CreateOrderType = z.infer<typeof ordersSchema>
+export type GetOrderType = z.infer<typeof ordersSchema>
 
 export const createOrderController = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
-    const userId = (req as any).user?.userId;
-    const { items } = req.body;
+    const result = await createOrder(req.body)
+    console.log("🚀 ~ createOrderController ~ req.body:", req.body)
 
-    if (!userId || !items) {
-      res.status(400).json({ message: "userId and items are required" });
-      return;
-    }
-
-    const result = await orderService.createOrder(userId, items);
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      data: result,
+    })
+  } catch (error) {
+    console.error('Create Order Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create order',
+    })
   }
-};
+}
 
-// get all orders - admin
-
+/**
+ * GET ALL ORDERS
+ */
 export const getAllOrdersController = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
-    const result = await orderService.getAllOrders();
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    const result = await getAllOrders()
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    })
+  } catch (error) {
+    console.error('Get Orders Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch orders',
+    })
   }
-};
+}
 
-// get orders by user
-export const getOrdersByUserController = async (
+export const getOrdersByUserIdController = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
-    const userId = (req as any).user?.userId;
-    const result = await orderService.getOrdersByUser(userId);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const userId = Number(req.params.userId)
 
-export const updateOrderStatusController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!status) {
-      res.status(400).json({ message: "status is required" });
-      return;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid userId',
+      })
     }
 
-    const result = await orderService.updateOrderStatus(Number(id), status);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    const result = await getOrdersByUserId(userId)
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    })
+  } catch (error) {
+    console.error('Get Orders By User Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user orders',
+    })
   }
-};
+}

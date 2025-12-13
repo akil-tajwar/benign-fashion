@@ -107,7 +107,6 @@ export const ordersSchema = z.object({
     fullName: z.string().max(255),
     division: z.string().max(15),
     district: z.string().max(15),
-    subDistrict: z.string().max(15),
     address: z.string().max(100),
     phone: z.string().max(14),
     email: z.string().max(50).nullable().optional(),
@@ -121,6 +120,7 @@ export const ordersSchema = z.object({
   orderDetails: z.array(
     z.object({
       id: z.number().optional(),
+      ordersMasterId: z.number(),
       productId: z.number(),
       size: z.enum(['M', 'L', 'XL', 'XXL']),
       quantity: z.number().default(1),
@@ -153,32 +153,6 @@ export type Users = {
   roleName?: string // Optional, if you want to include role name
 }
 
-export interface GetCart {
-  cartId: number
-  productId: number
-  quantity: number
-  name: string
-  price: number
-  url: string
-  createdAt: string
-}
-
-export interface AddToCartResponse {
-  message: string
-}
-
-//get all orders type
-export type GetAllOrdersType = {
-  id: number
-  userId: number
-  productId: number
-  productQuantity: number
-  status: string
-  totalAmount: number
-  createdAt: string
-  userName: string
-}
-
 export type userUpdateType = {
   username?: string
   email?: string
@@ -190,28 +164,4 @@ export type userUpdateType = {
   city?: string
   state?: string
   country?: string
-}
-
-export interface OrderItem {
-  productId: number
-  qty: number
-}
-
-export interface CreateOrderRequest {
-  userId: number
-  items: OrderItem[]
-}
-
-export interface OrderResponse {
-  id: number
-  userId: number
-  totalAmount: number
-  status: string
-  createdAt: string
-  items: {
-    productId: number
-    qty: number
-    price?: number
-    name?: string
-  }[]
 }

@@ -130,20 +130,27 @@ export default function ProductCard({
             disabled={!product.product.isAvailable}
             onClick={(e) => e.stopPropagation()}
             className={`
-      absolute inset-0 w-full text-white disabled:bg-gray-300 
-      text-sm md:text-base bg-blue-600 hover:bg-blue-700
-      transition-transform duration-500 ease-in-out
-      ${isButtonHovered ? '-translate-y-full' : 'translate-y-0'}
-    `}
+    absolute inset-0 w-full text-white
+    text-sm md:text-base font-semibold
+    bg-gradient-to-r from-blue-600 to-indigo-600
+    hover:from-blue-700 hover:to-indigo-700
+    disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-700
+    transition-all duration-500 ease-in-out
+    ${isButtonHovered ? '-translate-y-full' : 'translate-y-0'}
+  `}
           >
-            <span className="block font-medium">Add to Cart</span>
+            <span className="block">Add to Cart</span>
           </Button>
 
           {/* === SIZE BUTTONS VIEW === */}
           <div
             className={`
       absolute inset-0 bg-blue-600 rounded-md flex items-center justify-center gap-1 px-2
-      transition-transform duration-500 ease-in-out
+      font-semibold
+    bg-gradient-to-r from-blue-600 to-indigo-600
+    hover:from-blue-700 hover:to-indigo-700
+    disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-700
+    transition-all duration-500 ease-in-out
       ${isButtonHovered ? 'translate-y-0' : 'translate-y-full'}
     `}
           >

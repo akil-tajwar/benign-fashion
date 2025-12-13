@@ -5,246 +5,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import {
-  Plus,
-  Minus,
-  X,
-  ShoppingCart,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-} from 'lucide-react'
+import { ShoppingCart, MapPin, Phone, Mail, User } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { CustomCombobox } from '@/utils/custom-combobox'
-
-// Bangladesh location data
-const locationData = {
-  divisions: [
-    { id: 'Dhaka', name: 'Dhaka' },
-    { id: 'Chittagong', name: 'Chittagong' },
-    { id: 'Rajshahi', name: 'Rajshahi' },
-    { id: 'Khulna', name: 'Khulna' },
-    { id: 'Barisal', name: 'Barisal' },
-    { id: 'Sylhet', name: 'Sylhet' },
-    { id: 'Rangpur', name: 'Rangpur' },
-    { id: 'Mymensingh', name: 'Mymensingh' },
-  ],
-  districts: {
-    Dhaka: [
-      { id: 'Dhaka', name: 'Dhaka' },
-      { id: 'Faridpur', name: 'Faridpur' },
-      { id: 'Gazipur', name: 'Gazipur' },
-      { id: 'Gopalganj', name: 'Gopalganj' },
-      { id: 'Kishoreganj', name: 'Kishoreganj' },
-      { id: 'Madaripur', name: 'Madaripur' },
-      { id: 'Manikganj', name: 'Manikganj' },
-      { id: 'Munshiganj', name: 'Munshiganj' },
-      { id: 'Narayanganj', name: 'Narayanganj' },
-      { id: 'Narsingdi', name: 'Narsingdi' },
-      { id: 'Rajbari', name: 'Rajbari' },
-      { id: 'Shariatpur', name: 'Shariatpur' },
-      { id: 'Tangail', name: 'Tangail' },
-    ],
-    Chittagong: [
-      { id: 'Bandarban', name: 'Bandarban' },
-      { id: 'Brahmanbaria', name: 'Brahmanbaria' },
-      { id: 'Chandpur', name: 'Chandpur' },
-      { id: 'Chittagong', name: 'Chittagong' },
-      { id: 'Comilla', name: 'Comilla' },
-      { id: "Cox's Bazar", name: "Cox's Bazar" },
-      { id: 'Feni', name: 'Feni' },
-      { id: 'Khagrachhari', name: 'Khagrachhari' },
-      { id: 'Lakshmipur', name: 'Lakshmipur' },
-      { id: 'Noakhali', name: 'Noakhali' },
-      { id: 'Rangamati', name: 'Rangamati' },
-    ],
-    Rajshahi: [
-      { id: 'Bogra', name: 'Bogra' },
-      { id: 'Joypurhat', name: 'Joypurhat' },
-      { id: 'Naogaon', name: 'Naogaon' },
-      { id: 'Natore', name: 'Natore' },
-      { id: 'Chapainawabganj', name: 'Chapainawabganj' },
-      { id: 'Pabna', name: 'Pabna' },
-      { id: 'Rajshahi', name: 'Rajshahi' },
-      { id: 'Sirajganj', name: 'Sirajganj' },
-    ],
-    Khulna: [
-      { id: 'Bagerhat', name: 'Bagerhat' },
-      { id: 'Chuadanga', name: 'Chuadanga' },
-      { id: 'Jessore', name: 'Jessore' },
-      { id: 'Jhenaidah', name: 'Jhenaidah' },
-      { id: 'Khulna', name: 'Khulna' },
-      { id: 'Kushtia', name: 'Kushtia' },
-      { id: 'Magura', name: 'Magura' },
-      { id: 'Meherpur', name: 'Meherpur' },
-      { id: 'Narail', name: 'Narail' },
-      { id: 'Satkhira', name: 'Satkhira' },
-    ],
-    Barisal: [
-      { id: 'Barguna', name: 'Barguna' },
-      { id: 'Barisal', name: 'Barisal' },
-      { id: 'Bhola', name: 'Bhola' },
-      { id: 'Jhalokati', name: 'Jhalokati' },
-      { id: 'Patuakhali', name: 'Patuakhali' },
-      { id: 'Pirojpur', name: 'Pirojpur' },
-    ],
-    Sylhet: [
-      { id: 'Habiganj', name: 'Habiganj' },
-      { id: 'Moulvibazar', name: 'Moulvibazar' },
-      { id: 'Sunamganj', name: 'Sunamganj' },
-      { id: 'Sylhet', name: 'Sylhet' },
-    ],
-    Rangpur: [
-      { id: 'Dinajpur', name: 'Dinajpur' },
-      { id: 'Gaibandha', name: 'Gaibandha' },
-      { id: 'Kurigram', name: 'Kurigram' },
-      { id: 'Lalmonirhat', name: 'Lalmonirhat' },
-      { id: 'Nilphamari', name: 'Nilphamari' },
-      { id: 'Panchagarh', name: 'Panchagarh' },
-      { id: 'Rangpur', name: 'Rangpur' },
-      { id: 'Thakurgaon', name: 'Thakurgaon' },
-    ],
-    Mymensingh: [
-      { id: 'Jamalpur', name: 'Jamalpur' },
-      { id: 'Mymensingh', name: 'Mymensingh' },
-      { id: 'Netrokona', name: 'Netrokona' },
-      { id: 'Sherpur', name: 'Sherpur' },
-    ],
-  },
-  subDistricts: {
-    Dhaka: [
-      { id: 'Dhamrai', name: 'Dhamrai' },
-      { id: 'Dohar', name: 'Dohar' },
-      { id: 'Keraniganj', name: 'Keraniganj' },
-      { id: 'Nawabganj', name: 'Nawabganj' },
-      { id: 'Savar', name: 'Savar' },
-    ],
-    Chittagong: [
-      { id: 'Anwara', name: 'Anwara' },
-      { id: 'Banshkhali', name: 'Banshkhali' },
-      { id: 'Boalkhali', name: 'Boalkhali' },
-      { id: 'Chandanaish', name: 'Chandanaish' },
-      { id: 'Fatikchhari', name: 'Fatikchhari' },
-      { id: 'Hathazari', name: 'Hathazari' },
-      { id: 'Lohagara', name: 'Lohagara' },
-      { id: 'Mirsharai', name: 'Mirsharai' },
-      { id: 'Patiya', name: 'Patiya' },
-      { id: 'Rangunia', name: 'Rangunia' },
-      { id: 'Raozan', name: 'Raozan' },
-      { id: 'Sandwip', name: 'Sandwip' },
-      { id: 'Satkania', name: 'Satkania' },
-      { id: 'Sitakunda', name: 'Sitakunda' },
-    ],
-    Gazipur: [
-      { id: 'Gazipur Sadar', name: 'Gazipur Sadar' },
-      { id: 'Kaliakair', name: 'Kaliakair' },
-      { id: 'Kaliganj', name: 'Kaliganj' },
-      { id: 'Kapasia', name: 'Kapasia' },
-      { id: 'Sreepur', name: 'Sreepur' },
-    ],
-    Narayanganj: [
-      { id: 'Araihazar', name: 'Araihazar' },
-      { id: 'Bandar', name: 'Bandar' },
-      { id: 'Narayanganj Sadar', name: 'Narayanganj Sadar' },
-      { id: 'Rupganj', name: 'Rupganj' },
-      { id: 'Sonargaon', name: 'Sonargaon' },
-    ],
-    Comilla: [
-      { id: 'Barura', name: 'Barura' },
-      { id: 'Brahmanpara', name: 'Brahmanpara' },
-      { id: 'Burichang', name: 'Burichang' },
-      { id: 'Chandina', name: 'Chandina' },
-      { id: 'Chauddagram', name: 'Chauddagram' },
-      { id: 'Daudkandi', name: 'Daudkandi' },
-      { id: 'Debidwar', name: 'Debidwar' },
-      { id: 'Homna', name: 'Homna' },
-      { id: 'Laksam', name: 'Laksam' },
-      { id: 'Muradnagar', name: 'Muradnagar' },
-      { id: 'Nangalkot', name: 'Nangalkot' },
-      { id: 'Comilla Sadar', name: 'Comilla Sadar' },
-      { id: 'Meghna', name: 'Meghna' },
-      { id: 'Monohargonj', name: 'Monohargonj' },
-      { id: 'Sadarsouth', name: 'Sadarsouth' },
-      { id: 'Titas', name: 'Titas' },
-    ],
-    Rajshahi: [
-      { id: 'Bagha', name: 'Bagha' },
-      { id: 'Bagmara', name: 'Bagmara' },
-      { id: 'Charghat', name: 'Charghat' },
-      { id: 'Durgapur', name: 'Durgapur' },
-      { id: 'Godagari', name: 'Godagari' },
-      { id: 'Mohanpur', name: 'Mohanpur' },
-      { id: 'Paba', name: 'Paba' },
-      { id: 'Puthia', name: 'Puthia' },
-      { id: 'Tanore', name: 'Tanore' },
-    ],
-    Khulna: [
-      { id: 'Batiaghata', name: 'Batiaghata' },
-      { id: 'Dacope', name: 'Dacope' },
-      { id: 'Dumuria', name: 'Dumuria' },
-      { id: 'Dighalia', name: 'Dighalia' },
-      { id: 'Koyra', name: 'Koyra' },
-      { id: 'Paikgachha', name: 'Paikgachha' },
-      { id: 'Phultala', name: 'Phultala' },
-      { id: 'Rupsa', name: 'Rupsa' },
-      { id: 'Terokhada', name: 'Terokhada' },
-    ],
-    Sylhet: [
-      { id: 'Beanibazar', name: 'Beanibazar' },
-      { id: 'Bishwanath', name: 'Bishwanath' },
-      { id: 'Companiganj', name: 'Companiganj' },
-      { id: 'Fenchuganj', name: 'Fenchuganj' },
-      { id: 'Golapganj', name: 'Golapganj' },
-      { id: 'Gowainghat', name: 'Gowainghat' },
-      { id: 'Jaintiapur', name: 'Jaintiapur' },
-      { id: 'Kanaighat', name: 'Kanaighat' },
-      { id: 'Sylhet Sadar', name: 'Sylhet Sadar' },
-      { id: 'Zakiganj', name: 'Zakiganj' },
-    ],
-    Rangpur: [
-      { id: 'Badarganj', name: 'Badarganj' },
-      { id: 'Gangachhara', name: 'Gangachhara' },
-      { id: 'Kaunia', name: 'Kaunia' },
-      { id: 'Rangpur Sadar', name: 'Rangpur Sadar' },
-      { id: 'Mithapukur', name: 'Mithapukur' },
-      { id: 'Pirgachha', name: 'Pirgachha' },
-      { id: 'Pirganj', name: 'Pirganj' },
-      { id: 'Taraganj', name: 'Taraganj' },
-    ],
-    Mymensingh: [
-      { id: 'Bhaluka', name: 'Bhaluka' },
-      { id: 'Trishal', name: 'Trishal' },
-      { id: 'Haluaghat', name: 'Haluaghat' },
-      { id: 'Muktagachha', name: 'Muktagachha' },
-      { id: 'Dhobaura', name: 'Dhobaura' },
-      { id: 'Fulbaria', name: 'Fulbaria' },
-      { id: 'Gaffargaon', name: 'Gaffargaon' },
-      { id: 'Gauripur', name: 'Gauripur' },
-      { id: 'Ishwarganj', name: 'Ishwarganj' },
-      { id: 'Mymensingh Sadar', name: 'Mymensingh Sadar' },
-      { id: 'Nandail', name: 'Nandail' },
-      { id: 'Phulpur', name: 'Phulpur' },
-    ],
-  },
-}
-
-type CartItem = {
-  productId: number
-  name: string
-  price: number
-  quantity: number
-  url: string
-  discount: number
-  productCode: string
-  size: 'M' | 'L' | 'XL' | 'XXL'
-}
+import { useCart } from '@/hooks/use-cart'
+import { locationData } from '@/utils/constants'
+import { createOrder } from '@/utils/api'
+import { useAtom } from 'jotai'
+import { tokenAtom } from '@/utils/user'
 
 export default function CheckoutPage() {
+  const [token] = useAtom(tokenAtom)
   const router = useRouter()
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   // Form state
@@ -255,45 +29,13 @@ export default function CheckoutPage() {
     address: '',
     division: '',
     district: '',
-    subDistrict: '',
     method: 'bkash' as 'bkash' | 'nagad' | 'rocket',
     transactionId: '',
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const cart = localStorage.getItem('cart')
-    if (cart) {
-      setCartItems(JSON.parse(cart))
-    }
-  }, [])
-
-  // Update quantity
-  const updateQuantity = (
-    productId: number,
-    size: string,
-    newQuantity: number
-  ) => {
-    if (newQuantity < 1) return
-    const updatedCart = cartItems.map((item) =>
-      item.productId === productId && item.size === size
-        ? { ...item, quantity: newQuantity }
-        : item
-    )
-    setCartItems(updatedCart)
-    localStorage.setItem('cart', JSON.stringify(updatedCart))
-  }
-
-  // Remove item
-  const removeFromCart = (productId: number, size: string) => {
-    const updatedCart = cartItems.filter(
-      (item) => !(item.productId === productId && item.size === size)
-    )
-    setCartItems(updatedCart)
-    localStorage.setItem('cart', JSON.stringify(updatedCart))
-  }
+  const { cartItems } = useCart()
 
   // Calculate total
   const getTotalPrice = () => {
@@ -313,23 +55,12 @@ export default function CheckoutPage() {
     )
   }
 
-  // Get available sub-districts based on selected district
-  const getAvailableSubDistricts = () => {
-    if (!formData.district) return []
-    return (
-      locationData.subDistricts[
-        formData.district as keyof typeof locationData.subDistricts
-      ] || []
-    )
-  }
-
   // Handle division change
   const handleDivisionChange = (value: { id: string; name: string } | null) => {
     setFormData({
       ...formData,
       division: value?.id || '',
       district: '',
-      subDistrict: '',
     })
     setErrors({ ...errors, division: '' })
   }
@@ -339,20 +70,8 @@ export default function CheckoutPage() {
     setFormData({
       ...formData,
       district: value?.id || '',
-      subDistrict: '',
     })
     setErrors({ ...errors, district: '' })
-  }
-
-  // Handle sub-district change
-  const handleSubDistrictChange = (
-    value: { id: string; name: string } | null
-  ) => {
-    setFormData({
-      ...formData,
-      subDistrict: value?.id || '',
-    })
-    setErrors({ ...errors, subDistrict: '' })
   }
 
   // Validate form
@@ -364,8 +83,6 @@ export default function CheckoutPage() {
     if (!formData.address.trim()) newErrors.address = 'Address is required'
     if (!formData.division) newErrors.division = 'Division is required'
     if (!formData.district) newErrors.district = 'District is required'
-    if (!formData.subDistrict)
-      newErrors.subDistrict = 'Sub-district is required'
     if (!formData.transactionId.trim())
       newErrors.transactionId = 'Transaction ID is required'
 
@@ -398,16 +115,16 @@ export default function CheckoutPage() {
     setIsLoading(true)
 
     try {
-      const orderData = {
+      // Prepare payload in the shape backend expects
+      const payload = {
         orderMaster: {
           fullName: formData.fullName,
-          division: formData.division,
-          district: formData.district,
-          subDistrict: formData.subDistrict,
-          address: formData.address,
           phone: formData.phone,
           email: formData.email || null,
-          status: 'pending' as const,
+          address: formData.address,
+          division: formData.division,
+          district: formData.district,
+          status: 'pending',
           method: formData.method,
           transactionId: formData.transactionId,
           totalAmount: getTotalPrice(),
@@ -420,22 +137,11 @@ export default function CheckoutPage() {
         })),
       }
 
-      // Replace with your actual API endpoint
-      const response = await fetch('http://localhost:4000/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to place order')
-      }
+      // Send JSON, not FormData
+      const response = await createOrder(token, payload)
 
       toast.success('Order placed successfully!')
       localStorage.removeItem('cart')
-      router.push('/order-success')
     } catch (error) {
       console.error('Order error:', error)
       toast.error('Failed to place order. Please try again.')
@@ -641,36 +347,6 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">
-                    Sub-District <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="mt-1">
-                    <CustomCombobox
-                      items={getAvailableSubDistricts()}
-                      value={
-                        formData.subDistrict
-                          ? {
-                              id: formData.subDistrict,
-                              name:
-                                getAvailableSubDistricts().find(
-                                  (d) => d.id === formData.subDistrict
-                                )?.name || '',
-                            }
-                          : null
-                      }
-                      onChange={handleSubDistrictChange}
-                      placeholder="Select sub-district"
-                      disabled={!formData.district}
-                    />
-                  </div>
-                  {errors.subDistrict && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.subDistrict}
-                    </p>
-                  )}
-                </div>
-
-                <div>
                   <Label
                     htmlFor="address"
                     className="text-sm font-medium text-gray-700"
@@ -723,7 +399,15 @@ export default function CheckoutPage() {
                   >
                     bKash
                   </Label>
-                  <div className="text-pink-600 font-bold text-lg">bKash</div>
+                  <div className="text-pink-600 font-bold text-lg">
+                    <Image
+                      height={50}
+                      width={50}
+                      src={'/bkash.png'}
+                      alt={'bkash logo'}
+                      className="object-cover border rounded-xl"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-orange-500 transition-colors cursor-pointer">
@@ -734,7 +418,15 @@ export default function CheckoutPage() {
                   >
                     Nagad
                   </Label>
-                  <div className="text-orange-600 font-bold text-lg">Nagad</div>
+                  <div className="text-orange-600 font-bold text-lg">
+                    <Image
+                      height={50}
+                      width={50}
+                      src={'/nagad.webp'}
+                      alt={'nagad logo'}
+                      className="object-cover border rounded-md"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-purple-500 transition-colors cursor-pointer">
@@ -746,7 +438,13 @@ export default function CheckoutPage() {
                     Rocket
                   </Label>
                   <div className="text-purple-600 font-bold text-lg">
-                    Rocket
+                    <Image
+                      height={50}
+                      width={50}
+                      src={'/rocket.jpg'}
+                      alt={'rocket logo'}
+                      className="object-cover border rounded-md"
+                    />
                   </div>
                 </div>
               </RadioGroup>
@@ -791,7 +489,7 @@ export default function CheckoutPage() {
                     key={index}
                     className="flex items-start space-x-3 bg-gray-50 border border-gray-200 p-3 rounded-lg relative"
                   >
-                    <div className='w-14 h-14 overflow-hidden rounded-md'>
+                    <div className="w-14 h-14 overflow-hidden rounded-md">
                       <Image
                         height={64}
                         width={64}
@@ -808,13 +506,12 @@ export default function CheckoutPage() {
                       <span className="text-sm text-slate-600 font-medium">
                         Size: {item.size}
                       </span>
-
                     </div>
-                      <div className="flex justify-between items-center mt-3">
-                        <p className="font-semibold text-sm">
-                          ৳{(item.price * item.quantity).toFixed(2)}
-                        </p>
-                      </div>
+                    <div className="flex justify-between items-center mt-3">
+                      <p className="font-semibold text-sm">
+                        ৳{(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -1,5 +1,5 @@
 import { fetchApi, fetchApiWithFile } from '@/utils/http'
-import { CreateCategoryType, CreateProductType, GetCategoryType, GetProductType } from '@/utils/type'
+import { CreateCategoryType, CreateOrderType, CreateProductType, GetCategoryType, GetOrderType, GetProductType } from '@/utils/type'
 
 // Create a new category
 export async function createCategory(token: string, data: CreateCategoryType) {
@@ -83,6 +83,28 @@ export async function updateProduct(token: string, id: number, formData: FormDat
 export async function fetchProductById(token: string, id: number) {
   return fetchApi<GetProductType>({
     url: `api/products/get/${id}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
+export async function createOrder(token: string, formData: CreateOrderType) {
+  return fetchApiWithFile<CreateOrderType>({
+    url: 'api/orders/create',
+    method: 'POST',
+    headers: {
+      Authorization: `${token}`,
+    },
+    body: formData, // Pass FormData directly
+  })
+}
+
+export async function fetchCatAllOrders(token: string) {
+  return fetchApi<GetOrderType[]>({
+    url: 'api/orders/getAll',
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
