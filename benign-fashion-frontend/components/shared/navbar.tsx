@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Search, User, ShoppingCart, X } from 'lucide-react'
+import { Search, User, ShoppingCart, X, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import {
@@ -98,18 +98,23 @@ export default function Navbar({
               <Link
                 href={'/men-products'}
                 onMouseEnter={() => setHoverMenu('men')}
-                className="cursor-pointer hover:text-blue-600"
+                className="cursor-pointer hover:text-blue-600 flex items-center"
               >
-                Men
+                <p>Men</p> <ChevronDown className='w-5'/>
               </Link>
               <Link
                 href={'/kids-products'}
                 onMouseEnter={() => setHoverMenu('kids')}
+                className="cursor-pointer hover:text-blue-600 flex items-center"
+              >
+                <p>Kids</p> <ChevronDown className='w-5'/>
+              </Link>
+              <Link
+                href={'/flash-sale-products'}
                 className="cursor-pointer hover:text-blue-600"
               >
-                Kids
+                Flash Sale
               </Link>
-              <Link href={'/dashboard/categories'}>Dashboard</Link>
 
               {/* HOVER DROPDOWN */}
               {hoverMenu &&
@@ -220,7 +225,7 @@ export default function Navbar({
                       </DropdownMenuItem>
                       {roleId === 1 && (
                         <DropdownMenuItem
-                          onClick={() => router.push('/admin-dashboard')}
+                          onClick={() => router.push('/dashboard/categories')}
                         >
                           Admin Dashboard
                         </DropdownMenuItem>

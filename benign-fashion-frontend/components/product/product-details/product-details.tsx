@@ -48,8 +48,6 @@ export default function ProductDetails() {
 
   const getRelatedProducts = useCallback(
     async (currentProduct: GetProductType) => {
-      if (!token) return
-
       const products = await fetchProducts(token)
 
       if (products.error || !products.data) {

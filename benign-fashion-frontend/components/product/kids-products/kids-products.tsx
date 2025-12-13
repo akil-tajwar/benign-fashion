@@ -4,12 +4,14 @@ import { useState, useEffect, useCallback } from 'react'
 import type { GetProductType } from '@/utils/type'
 import { fetchProducts } from '@/utils/api'
 import CategoryProductsDisplay from '../category-product-display'
+import { useAtom } from 'jotai'
+import { tokenAtom } from '@/utils/user'
 
 export default function KidsProducts() {
   const [products, setProducts] = useState<GetProductType[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const token = 'your-token'
+  const [token] = useAtom(tokenAtom)
 
   const getProducts = useCallback(async () => {
     try {

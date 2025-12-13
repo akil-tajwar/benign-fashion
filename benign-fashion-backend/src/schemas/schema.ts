@@ -109,7 +109,7 @@ export const ordersMasterModel = mysqlTable("orders_master", {
   address: varchar("address", { length: 100 }),
   phone: varchar("phone", { length: 14 }),
   email: varchar("email", { length: 50 }),
-  status: mysqlEnum("status", ["pending", "delivered"]).default("pending"),
+  status: mysqlEnum("status", ["pending", "confirmed", "delivered"]).default("pending"),
   method: mysqlEnum("method", ["bkash", "nagad", "rocket"]).notNull(),
   transactionId: varchar("transaction_id", { length: 255 }),
   totalAmount: int("total_amount").notNull(),

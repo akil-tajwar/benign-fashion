@@ -7,7 +7,7 @@ import CategoryProductsDisplay from '../category-product-display'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
 
-export default function MenProducts() {
+const FlashSaleProducts = () => {
   const [products, setProducts] = useState<GetProductType[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,15 +17,13 @@ export default function MenProducts() {
     try {
       const res = await fetchProducts(token)
       const productsData = res.data ?? []
-      console.log("🚀 ~ MenProducts ~ productsData:", productsData)
 
-      // Filter for men's products
-      const menProducts = productsData.filter(
-        (p: GetProductType) => p.product?.categoryType === 'men'
+      // Filter for kids' products
+      const flashSaleProducts = productsData.filter(
+        (p: GetProductType) => p.product?.isFlashSale === true
       )
-      console.log("🚀 ~ MenProducts ~ menProducts:", menProducts)
 
-      setProducts(menProducts)
+      setProducts(flashSaleProducts)
     } catch (err) {
       console.error(err)
       setError('Failed to load products')
@@ -37,13 +35,14 @@ export default function MenProducts() {
   useEffect(() => {
     getProducts()
   }, [getProducts])
-
   return (
     <CategoryProductsDisplay
-      categoryType="Men"
+      categoryType="Flash Sale"
       products={products}
       loading={loading}
       error={error}
     />
   )
 }
+
+export default FlashSaleProducts
