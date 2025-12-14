@@ -20,7 +20,7 @@ export default function ProductDetails() {
   const { addToCart } = useCart()
   const { toast } = useToast()
   const id = Number(params.id)
-  console.log("🚀 ~ ProductDetails ~ id:", id)
+  console.log('🚀 ~ ProductDetails ~ id:', id)
   const [token] = useAtom(tokenAtom)
   const [product, setProduct] = useState<GetProductType | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<GetProductType[]>([])
@@ -42,7 +42,7 @@ export default function ProductDetails() {
       })
     } else {
       setProduct(product.data)
-      console.log("🚀 ~ ProductDetails ~ product.data:", product.data)
+      console.log('🚀 ~ ProductDetails ~ product.data:', product.data)
     }
   }, [token, id, toast])
 
@@ -250,8 +250,9 @@ export default function ProductDetails() {
               </label>
               <div className="flex gap-2 flex-wrap">
                 {ALL_SIZES.map((size) => {
-                  const isAvailable =
-                    product.product?.availableSize?.includes(size as 'S' | 'M' | 'L' | 'XL' | 'XXL')
+                  const isAvailable = product.product?.availableSize?.includes(
+                    size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
+                  )
 
                   return (
                     <button
