@@ -1,5 +1,10 @@
 'use client'
 
+import { FaFacebookF, FaWhatsapp, FaTiktok, FaInstagram } from 'react-icons/fa'
+import { FaThreads } from "react-icons/fa6";
+import { CiYoutube } from "react-icons/ci";
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-100 mt-12 sm:mt-16">
@@ -11,6 +16,14 @@ export default function Footer() {
             <p className="text-sm text-gray-400">
               Your trusted online store for quality fashion and kids clothing.
             </p>
+            <div className='flex gap-3 items-center mt-6'>
+              <Link href={'https://www.facebook.com/benignfashion'} target='_blank'><FaFacebookF className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+              <Link href={'https://www.instagram.com/benignfashion25/?hl=en'} target='_blank'><FaInstagram className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+              <Link href={'https://wa.me/+7701703133275'} target='_blank'><FaWhatsapp className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+              <Link href={'https://www.threads.com/@benignfashion25?hl=en'} target='_blank'><FaThreads className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+              <Link href={'https://www.youtube.com/@benignfashion'} target='_blank'><CiYoutube className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+              <Link href={'https://www.tiktok.com/@benign.fashion?is_from_webapp=1&sender_device=pc'} target='_blank'><FaTiktok className='border border-white w-7 h-7 p-1 rounded-lg'/></Link>
+            </div>
           </div>
 
           {/* Column 2 */}

@@ -110,7 +110,7 @@ export const ordersSchema = z.object({
     address: z.string().max(100),
     phone: z.string().max(14),
     email: z.string().max(50).nullable().optional(),
-    status: z.enum(['pending', 'delivered']).default('pending'),
+    status: z.enum(['pending', 'confirmed', 'delivered']).default('pending'),
     method: z.enum(['bkash', 'nagad', 'rocket']),
     transactionId: z.string().max(255).nullable().optional(),
     totalAmount: z.number(),

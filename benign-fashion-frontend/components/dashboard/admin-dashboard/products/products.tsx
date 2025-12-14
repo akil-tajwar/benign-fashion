@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +15,15 @@ import {
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DialogFooter } from '@/components/ui/dialog'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, ArrowUpDown, Search } from 'lucide-react'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import type {
   CreateProductType,
   GetCategoryType,
@@ -33,6 +41,9 @@ import { useRouter } from 'next/navigation'
 import { Popup } from '@/utils/popup'
 import { CustomCombobox } from '@/utils/custom-combobox'
 import Image from 'next/image'
+
+type SortColumn = 'productCode' | 'name' | 'price' | 'discount' | 'isAvailable'
+type SortDirection = 'asc' | 'desc'
 
 const Products = () => {
   useInitializeUser()
@@ -52,6 +63,13 @@ const Products = () => {
     null
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Sorting, searching, and pagination state
+  const [sortColumn, setSortColumn] = useState<SortColumn>('name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   // State for form data
   const [formData, setFormData] = useState<CreateProductType>({
@@ -299,6 +317,78 @@ const Products = () => {
     [formData, token, fetchProductsData, resetForm, editingProduct, photoFiles]
   )
 
+  // Filtering products based on search term
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products
+
+    return products.filter((product) => {
+      const categoryName =
+        categories.find((cat) => cat.id === product.product.categoryId)?.name ||
+        ''
+      const subCategoryName =
+        subCategories.find((sub) => sub.id === product.product.subCategoryId)
+          ?.name || ''
+
+      return (
+        product.product.productCode
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        product.product.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        product.product.description
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subCategoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.product.price?.toString().includes(searchTerm) ||
+        product.product.discount?.toString().includes(searchTerm)
+      )
+    })
+  }, [products, searchTerm, categories, subCategories])
+
+  // Sorting products
+  const sortedProducts = useMemo(() => {
+    const sorted = [...filteredProducts]
+    sorted.sort((a, b) => {
+      if (sortColumn === 'price' || sortColumn === 'discount') {
+        return sortDirection === 'asc'
+          ? Number(a.product[sortColumn]) - Number(b.product[sortColumn])
+          : Number(b.product[sortColumn]) - Number(a.product[sortColumn])
+      }
+      if (sortColumn === 'isAvailable') {
+        return sortDirection === 'asc'
+          ? Number(a.product.isAvailable) - Number(b.product.isAvailable)
+          : Number(b.product.isAvailable) - Number(a.product.isAvailable)
+      }
+      return sortDirection === 'asc'
+        ? String(a.product[sortColumn] || '').localeCompare(
+            String(b.product[sortColumn] || '')
+          )
+        : String(b.product[sortColumn] || '').localeCompare(
+            String(a.product[sortColumn] || '')
+          )
+    })
+    return sorted
+  }, [filteredProducts, sortColumn, sortDirection])
+
+  // Pagination
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return sortedProducts.slice(startIndex, startIndex + itemsPerPage)
+  }, [sortedProducts, currentPage])
+
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage)
+
+  const handleSort = (column: SortColumn) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
   // Get selected category and subcategory objects for combobox display
   const selectedCategory = formData.product.categoryId
     ? categories.find((c) => c.id === formData.product.categoryId)
@@ -317,31 +407,42 @@ const Products = () => {
           </div>
           <h2 className="text-lg font-semibold">Products</h2>
         </div>
-        <Button
-          className="bg-blue-400 hover:bg-blue-500 text-black"
-          onClick={() => {
-            setEditingProduct(null)
-            setFormData({
-              product: {
-                productCode: '',
-                name: '',
-                description: '',
-                price: 0,
-                discount: 0,
-                categoryId: 0,
-                subCategoryId: 0,
-                isAvailable: true,
-                isFlashSale: false,
-                availableSize: [],
-              },
-              photoUrls: [{ url: '' }],
-            })
-            setPhotoFiles([]) // ← Changed: empty array instead of [new File([], '')]
-            setIsPopupOpen(true)
-          }}
-        >
-          Add Product
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-64"
+            />
+          </div>
+          <Button
+            className="bg-blue-400 hover:bg-blue-500 text-black"
+            onClick={() => {
+              setEditingProduct(null)
+              setFormData({
+                product: {
+                  productCode: '',
+                  name: '',
+                  description: '',
+                  price: 0,
+                  discount: 0,
+                  categoryId: 0,
+                  subCategoryId: 0,
+                  isAvailable: true,
+                  isFlashSale: false,
+                  availableSize: [],
+                },
+                photoUrls: [{ url: '' }],
+              })
+              setPhotoFiles([]) // ← Changed: empty array instead of [new File([], '')]
+              setIsPopupOpen(true)
+            }}
+          >
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Table for product data */}
@@ -351,11 +452,51 @@ const Products = () => {
             <TableRow>
               <TableHead>Sl No</TableHead>
               <TableHead>Image</TableHead>
-              <TableHead>Product Code</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Discount</TableHead>
-              <TableHead>Available</TableHead>
+              <TableHead
+                onClick={() => handleSort('productCode')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Product Code</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('name')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Name</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('price')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Price</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('discount')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Discount</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('isAvailable')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Available</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -366,16 +507,18 @@ const Products = () => {
                   Loading products...
                 </TableCell>
               </TableRow>
-            ) : products.length === 0 ? (
+            ) : paginatedProducts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-4">
                   No products found
                 </TableCell>
               </TableRow>
             ) : (
-              products.map((product, index) => (
+              paginatedProducts.map((product, index) => (
                 <TableRow key={product.product.id}>
-                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </TableCell>
                   <TableCell>
                     {product.photoUrls && product.photoUrls.length > 0 ? (
                       <Image
@@ -420,6 +563,44 @@ const Products = () => {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className={
+                  currentPage === 1 ? 'pointer-events-none opacity-50' : ''
+                }
+              />
+            </PaginationItem>
+            {[...Array(totalPages)].map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(index + 1)}
+                  isActive={currentPage === index + 1}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                className={
+                  currentPage === totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : ''
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
 
       {/* Dialog with form */}

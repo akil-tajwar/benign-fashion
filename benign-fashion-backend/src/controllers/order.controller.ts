@@ -66,10 +66,7 @@ export const getAllOrdersController = async (
   try {
     const result = await getAllOrders()
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    })
+    res.status(200).json(result)
   } catch (error) {
     console.error('Get Orders Error:', error)
     res.status(500).json({

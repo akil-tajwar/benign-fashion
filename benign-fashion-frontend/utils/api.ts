@@ -1,5 +1,12 @@
 import { fetchApi, fetchApiWithFile } from '@/utils/http'
-import { CreateCategoryType, CreateOrderType, CreateProductType, GetCategoryType, GetOrderType, GetProductType } from '@/utils/type'
+import {
+  CreateCategoryType,
+  CreateOrderType,
+  CreateProductType,
+  GetCategoryType,
+  GetOrderType,
+  GetProductType,
+} from '@/utils/type'
 
 // Create a new category
 export async function createCategory(token: string, data: CreateCategoryType) {
@@ -68,7 +75,11 @@ export async function fetchProducts(token: string) {
 }
 
 // Update product API
-export async function updateProduct(token: string, id: number, formData: FormData) {
+export async function updateProduct(
+  token: string,
+  id: number,
+  formData: FormData
+) {
   return fetchApiWithFile<CreateProductType>({
     url: `api/products/update/${id}`,
     method: 'PUT',
@@ -102,13 +113,34 @@ export async function createOrder(token: string, formData: CreateOrderType) {
   })
 }
 
-export async function fetchCatAllOrders(token: string) {
+export async function fetchAllOrders(token: string) {
   return fetchApi<GetOrderType[]>({
     url: 'api/orders/getAll',
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `${token}`,
+    },
+  })
+}
+
+export async function confirmOrder(token: string, id: number) {
+  return fetchApiWithFile<CreateProductType>({
+    url: `api/orders/confirm-order/${id}`,
+    method: 'PUT',
+    headers: {
+      Authorization: `${token}`,
+    },
+  })
+}
+
+export async function deleteOrder(id: number, token: string) {
+  return fetchApi<{ claimType: string; id: number }>({
+    url: `api/claim/delete-order/${id}`,
+    method: 'DELETE',
+    headers: {
+      Authorization: token,
+      'Content-Type': 'application/json',
     },
   })
 }

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   BriefcaseBusiness,
+  Check,
   ChevronDown,
   FileChartColumn,
   Home,
@@ -38,11 +39,11 @@ export function DashboardSidebar() {
   const pathname = usePathname()
 
   const navItems = [
-    {
-      title: 'Dashboard Overview',
-      icon: Home,
-      href: '/dashboard/dashboard-overview',
-    },
+    // {
+    //   title: 'Dashboard Overview',
+    //   icon: Home,
+    //   href: '/dashboard/dashboard-overview',
+    // },
     {
       title: 'Categories',
       icon: Plus,
@@ -54,9 +55,14 @@ export function DashboardSidebar() {
       href: '/dashboard/products',
     },
     {
-      title: 'Orders',
+      title: 'Orders To Confirm',
       icon: FileChartColumn,
-      href: '/dashboard/orders',
+      href: '/dashboard/orders-to-confirm',
+    },
+    {
+      title: 'Confirmed Orders',
+      icon: Check,
+      href: '/dashboard/confirmed-orders',
     },
     {
       title: 'Users',
