@@ -26,7 +26,6 @@ export const findUserByEmail = async (email: string) => {
   return user;
 };
 
-
 export const getUserDetailsByUserId = async (userId: number) => {
   console.log(userId);
   const user = await db.query.userModel.findFirst({
@@ -41,8 +40,6 @@ export const getUserDetailsByUserId = async (userId: number) => {
           },
         },
       },
-
-      
     },
   });
   return user;
@@ -51,6 +48,7 @@ export const getUserDetailsByUserId = async (userId: number) => {
 // Create user function
 
 export const createUser = async (userData: NewUser) => {
+  console.log("🚀 ~ createUser ~ userData:", userData)
   try {
     // Check if username already exists
     const existingUser = await findUserByUsername(userData.username);
@@ -68,7 +66,7 @@ export const createUser = async (userData: NewUser) => {
     validatePassword(userData.password);
     const hashedPassword = await hashPassword(userData.password);
 
-    // Insert user
+    // Insert user with all fields
     const [newUserId] = await db
       .insert(userModel)
       .values({
@@ -77,6 +75,11 @@ export const createUser = async (userData: NewUser) => {
         password: hashedPassword,
         active: userData.active,
         roleId: userData.roleId,
+        fullName: userData.fullName,
+        phone: userData.phone,
+        division: userData.division,
+        district: userData.district,
+        address: userData.address,
       })
       .$returningId();
 
@@ -87,12 +90,16 @@ export const createUser = async (userData: NewUser) => {
       email: userData.email,
       active: userData.active,
       roleId: userData.roleId,
+      fullName: userData.fullName,
+      phone: userData.phone,
+      division: userData.division,
+      district: userData.district,
+      address: userData.address,
     };
   } catch (error) {
     throw error;
   }
 };
-
 
 //get user api
 
@@ -106,10 +113,9 @@ export const getUsers = async () => {
       roleId: userModel.roleId,
       fullName: userModel.fullName,
       phone: userModel.phone,
-      street: userModel.street,
-      city: userModel.city,
-      state: userModel.state,
-      country: userModel.country,
+      division: userModel.division,
+      district: userModel.district,
+      address: userModel.address,
       createdAt: userModel.createdAt,
       updatedAt: userModel.updatedAt,
       roleName: roleModel.roleName,
@@ -118,9 +124,7 @@ export const getUsers = async () => {
     .leftJoin(roleModel, eq(userModel.roleId, roleModel.roleId));
 
   return userList;
-}
-
-
+};
 
 // ========== Service Layer ==========
 export const updateUser = async (
@@ -132,12 +136,11 @@ export const updateUser = async (
     active?: boolean;
     fullName?: string;
     phone?: string;
-    street?: string;
-    city?: string;
-    state?: string;
-    country?: string;
+    division?: string;
+    district?: string;
+    address?: string;
     // ⚠️ no password here
-  },
+  }
 ) => {
   await db
     .update(userModel)
@@ -153,10 +156,9 @@ export const updateUser = async (
       active: userModel.active,
       fullName: userModel.fullName,
       phone: userModel.phone,
-      street: userModel.street,
-      city: userModel.city,
-      state: userModel.state,
-      country: userModel.country,
+      division: userModel.division,
+      district: userModel.district,
+      address: userModel.address,
     })
     .from(userModel)
     .where(sql`${userModel.userId} = ${userId}`)
@@ -165,13 +167,12 @@ export const updateUser = async (
   return updatedUser[0];
 };
 
-
 export const loginUser = async (username: string, password: string) => {
   const user = await findUserByUsername(username);
 
   if (!user) {
     throw UnauthorizedError(
-      "Wrong username/passwrod. Please Contact with Administrator",
+      "Wrong username/passwrod. Please Contact with Administrator"
     );
   }
 
@@ -184,7 +185,7 @@ export const loginUser = async (username: string, password: string) => {
 
   if (!isValidPassword) {
     throw UnauthorizedError(
-      "Wrong username/password. Please Contact with Administrator",
+      "Wrong username/password. Please Contact with Administrator"
     );
   }
 
@@ -210,7 +211,7 @@ export const loginUser = async (username: string, password: string) => {
 export const changePassword = async (
   userId: number,
   currentPassword: string,
-  newPassword: string,
+  newPassword: string
 ) => {
   const user = await db
     .select()
@@ -237,7 +238,6 @@ export const changePassword = async (
     .where(eq(userModel.userId, userId));
 };
 
-
 // get user by userId
 export const getUserById = async (userId: number) => {
   const user = await db
@@ -249,10 +249,9 @@ export const getUserById = async (userId: number) => {
       roleId: userModel.roleId,
       fullName: userModel.fullName,
       phone: userModel.phone,
-      street: userModel.street,
-      city: userModel.city,
-      state: userModel.state,
-      country: userModel.country,
+      division: userModel.division,
+      district: userModel.district,
+      address: userModel.address,
       createdAt: userModel.createdAt,
       updatedAt: userModel.updatedAt,
       roleName: roleModel.roleName,

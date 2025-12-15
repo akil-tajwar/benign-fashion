@@ -12,6 +12,11 @@ export const RegisterRequestSchema = z
     confirmPassword: z
       .string()
       .min(8, 'Confirm password must be at least 8 characters'),
+    fullName: z.string().optional(),
+    phone: z.string().optional(),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    address: z.string().optional(),
     active: z.boolean().default(true),
     roleId: z.number().default(2),
   })
@@ -31,6 +36,11 @@ export const RegisterResponseSchema = z.object({
       email: z.string().email(),
       roleId: z.number(),
       active: z.boolean(),
+      fullName: z.string().optional(),
+      phone: z.string().optional(),
+      division: z.string().optional(),
+      district: z.string().optional(),
+      address: z.string().optional(),
     }),
   }),
 })

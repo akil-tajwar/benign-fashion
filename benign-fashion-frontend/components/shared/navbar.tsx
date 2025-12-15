@@ -230,13 +230,11 @@ export default function Navbar({
                           Admin Dashboard
                         </DropdownMenuItem>
                       )}
-                      {roleId === 2 && (
                         <DropdownMenuItem
                           onClick={() => router.push('/user-dashboard')}
                         >
-                          My Dashboard
+                          Profile
                         </DropdownMenuItem>
-                      )}
                       <DropdownMenuItem
                         onClick={handleLogout}
                         className="text-red-600"

@@ -52,6 +52,8 @@ export const userModel = mysqlTable("users", {
   }),
   fullName: varchar("full_name", { length: 100 }),
   phone: varchar("phone", { length: 20 }).unique(),
+  division: varchar("division", { length: 15 }),
+  district: varchar("district", { length: 15 }),
   address: varchar("address", { length: 255 }),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at")

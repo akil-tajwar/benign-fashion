@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 
-
 import { db } from "../config/database";
 import { roleModel, userModel } from "../schemas";
 import { eq } from "drizzle-orm";
@@ -23,7 +22,6 @@ const loginSchema = z.object({
     .min(8, "Password must be at least 8 characters"),
 });
 
-
 const registerSchema = z
   .object({
     username: z.string().min(1, "Username is required"),
@@ -38,15 +36,16 @@ const registerSchema = z
     confirmPassword: z.string(),
     active: z.boolean().default(true),
     roleId: z.number(),
+    fullName: z.string().optional(),
+    phone: z.string().optional(),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    address: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
-
-
-
-
 
 const changePasswordSchema = z
   .object({
@@ -63,12 +62,10 @@ const changePasswordSchema = z
     path: ["confirmNewPassword"],
   });
 
-
-
 export const login = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const { username, password } = loginSchema.parse(req.body);
@@ -86,15 +83,34 @@ export const login = async (
 export const register = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    const { username, email, password, active, roleId } =
-      registerSchema.parse(req.body);
+    const {
+      username,
+      email,
+      password,
+      active,
+      roleId,
+      fullName,
+      phone,
+      division,
+      district,
+      address,
+    } = registerSchema.parse(req.body);
 
-    const user = await createUser(
-      { username, email, password, active, roleId }
-    );
+    const user = await createUser({
+      username,
+      email,
+      password,
+      active,
+      roleId,
+      fullName,
+      phone,
+      division,
+      district,
+      address,
+    });
 
     res.status(201).json({
       status: "success",
@@ -104,6 +120,11 @@ export const register = async (
           email: user.email,
           roleId: user.roleId,
           active: user.active,
+          fullName: user.fullName,
+          phone: user.phone,
+          division: user.division,
+          district: user.district,
+          address: user.address,
         },
       },
     });
@@ -112,15 +133,12 @@ export const register = async (
   }
 };
 
-
-
 // ========== Controller Layer ==========
-
 
 export const updateUserController = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { userId } = req.params;
@@ -131,10 +149,9 @@ export const updateUserController = async (
       active,
       fullName,
       phone,
-      street,
-      city,
-      state,
-      country,
+      division,
+      district,
+      address,
     } = req.body;
 
     const updateData: {
@@ -144,10 +161,9 @@ export const updateUserController = async (
       active?: boolean;
       fullName?: string;
       phone?: string;
-      street?: string;
-      city?: string;
-      state?: string;
-      country?: string;
+      division?: string;
+      district?: string;
+      address?: string;
     } = {};
 
     if (username !== undefined) updateData.username = username;
@@ -156,10 +172,9 @@ export const updateUserController = async (
     if (active !== undefined) updateData.active = Boolean(active);
     if (fullName !== undefined) updateData.fullName = fullName;
     if (phone !== undefined) updateData.phone = phone;
-    if (street !== undefined) updateData.street = street;
-    if (city !== undefined) updateData.city = city;
-    if (state !== undefined) updateData.state = state;
-    if (country !== undefined) updateData.country = country;
+    if (division !== undefined) updateData.division = division;
+    if (district !== undefined) updateData.district = district;
+    if (address !== undefined) updateData.address = address;
 
     const updatedUser = await updateUser(Number(userId), updateData);
 
@@ -182,17 +197,15 @@ export const updateUserController = async (
   }
 };
 
-
-
 export const changePasswordController = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const { userId } = req.params;
     const { currentPassword, newPassword } = changePasswordSchema.parse(
-      req.body,
+      req.body
     );
 
     await changePassword(Number(userId), currentPassword, newPassword);
@@ -206,12 +219,10 @@ export const changePasswordController = async (
   }
 };
 
-
-
 export const getUsersWithRoles = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const usersWithRoles = await db
@@ -264,5 +275,23 @@ export const getUserByIdController = async (
     res.status(200).json(user);
   } catch (error) {
     next(error); // Pass errors to Express error handler
+  }
+};
+
+// get all users
+export const getUsersController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const users = await getUsers();
+
+    res.status(200).json({
+      status: "success",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
   }
 };
