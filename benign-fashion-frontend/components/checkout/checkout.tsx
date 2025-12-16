@@ -23,10 +23,12 @@ import { useCart } from '@/hooks/use-cart'
 import { locationData } from '@/utils/constants'
 import { createOrder } from '@/utils/api'
 import { useAtom } from 'jotai'
-import { tokenAtom } from '@/utils/user'
+import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 
 export default function CheckoutPage() {
+  useInitializeUser()
   const [token] = useAtom(tokenAtom)
+  const [userData] = useAtom(userDataAtom)
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -137,6 +139,7 @@ export default function CheckoutPage() {
           method: formData.method,
           transactionId: formData.transactionId,
           totalAmount: getTotalPrice(),
+          userId: userData.userId
         },
         orderDetails: cartItems.map((item) => ({
           productId: item.productId,

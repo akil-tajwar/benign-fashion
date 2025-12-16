@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { X, User, Lock, Eye, EyeOff } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { signIn } from "@/api/signin-api"
+import { signIn } from "@/utils/api"
 
 export type UserType = {
   userId: number

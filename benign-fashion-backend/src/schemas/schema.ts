@@ -113,6 +113,7 @@ export const ordersMasterModel = mysqlTable("orders_master", {
   email: varchar("email", { length: 50 }),
   status: mysqlEnum("status", ["pending", "confirmed", "delivered"]).default("pending"),
   method: mysqlEnum("method", ["bkash", "nagad", "rocket"]).notNull(),
+  // billingPhone: varchar("billing_phone", { length: 14 }),
   transactionId: varchar("transaction_id", { length: 255 }),
   totalAmount: int("total_amount").notNull(),
   createdAt: timestamp("created_at").defaultNow(),

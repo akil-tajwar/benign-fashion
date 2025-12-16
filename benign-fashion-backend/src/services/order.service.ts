@@ -1,7 +1,7 @@
 
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNotNull } from 'drizzle-orm'
 import { db } from '../config/database'
-import { ordersDetailsModel, ordersMasterModel } from '../schemas'
+import { ordersDetailsModel, ordersMasterModel, productsModel } from '../schemas'
 import { CreateOrderType } from '../controllers/order.controller'
 
 /**
@@ -75,26 +75,46 @@ export const getAllOrders = async () => {
   return orders
 }
 
-export const getOrdersByUserId = async (
-  userId: number
-) => {
+export const getOrdersByUserId = async (userId: number) => {
+  if (!userId || Number.isNaN(userId)) {
+    return []
+  }
+
   const masters = await db
     .select()
     .from(ordersMasterModel)
-    .where(eq(ordersMasterModel.userId, userId))
+    .where(
+      and(
+        eq(ordersMasterModel.userId, userId),
+        isNotNull(ordersMasterModel.userId)
+      )
+    )
     .orderBy(desc(ordersMasterModel.createdAt))
 
-  const orders = await Promise.all(
-    masters.map(async (master) => {
-      const details = await db
-        .select()
-        .from(ordersDetailsModel)
-        .where(eq(ordersDetailsModel.ordersMasterId, master.id))
-
-      return {
-        orderMaster: master,
-        orderDetails: details,
-      }
+    const orders = await Promise.all(
+      masters.map(async (master) => {
+        const details = await db
+          .select({
+            id: ordersDetailsModel.id,
+            ordersMasterId: ordersDetailsModel.ordersMasterId,
+            productId: ordersDetailsModel.productId,
+            productName: productsModel.name,
+            size: ordersDetailsModel.size,
+            quantity: ordersDetailsModel.quantity,
+            amount: ordersDetailsModel.amount,
+            createdAt: ordersDetailsModel.createdAt,
+          })
+          .from(ordersDetailsModel)
+          .leftJoin(
+            productsModel,
+            eq(ordersDetailsModel.productId, productsModel.id)
+          )
+          .where(eq(ordersDetailsModel.ordersMasterId, master.id))
+  
+        return {
+          orderMaster: master,
+          orderDetails: details,
+        }
     })
   )
 

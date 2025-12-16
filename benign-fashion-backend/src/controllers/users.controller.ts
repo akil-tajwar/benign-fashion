@@ -1,6 +1,7 @@
 import { getUsers } from "../services/auth.service";
 import { requirePermission } from "../services/utils/jwt.utils";
 import { Request, Response, NextFunction } from "express";
+
 export const getUserList = async (
   req: Request,
   res: Response,

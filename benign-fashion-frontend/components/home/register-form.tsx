@@ -22,13 +22,13 @@ import {
   ChevronLeft,
 } from 'lucide-react'
 import { RegisterRequestSchema } from '@/utils/type'
-import { registerUser } from '@/api/signup-api'
 import { getUsers } from '@/api/users-api'
 import { UserType } from './login-form'
 import { tokenAtom } from '@/utils/user'
 import { toast } from '@/hooks/use-toast'
 import { locationData } from '@/utils/constants'
 import { CustomCombobox } from '@/utils/custom-combobox'
+import { registerUser } from '@/utils/api'
 
 interface RegisterFormProps {
   isOpen: boolean

@@ -132,6 +132,7 @@ export const ordersSchema = z.object({
       id: z.number().optional(),
       ordersMasterId: z.number(),
       productId: z.number(),
+      productName: z.string().nullable().optional(),
       size: z.enum(['M', 'L', 'XL', 'XXL']),
       quantity: z.number().default(1),
       amount: z.number(),
@@ -142,36 +143,19 @@ export const ordersSchema = z.object({
 export type CreateOrderType = z.infer<typeof ordersSchema>
 export type GetOrderType = z.infer<typeof ordersSchema>
 
-// ✅ Define User type (based on your DB schema)
-export type Users = {
-  userId: number
-  username: string
-  email: string
-  password: string
-  active: boolean
-  roleId: number | null
-  fullName: string | null
-  phone: string | null
-  street: string | null
-  city: string | null
-  state: string | null
-  country: string | null
-  postalCode: string | null
-  isPasswordResetRequired: boolean
-  createdAt: string
-  updatedAt: string
-  roleName?: string // Optional, if you want to include role name
-}
-
-export type userUpdateType = {
-  username?: string
-  email?: string
-  roleId?: number
-  active?: boolean
-  fullName?: string
-  phone?: string
-  street?: string
-  city?: string
-  state?: string
-  country?: string
-}
+export const userSchema = z.object({
+  userId: z.number().optional(), // auto increment
+  username: z.string(),
+  email: z.string(),
+  password: z.string(),
+  active: z.boolean(),
+  roleId: z.number(),
+  fullName: z.string(),
+  phone: z.string(),
+  division: z.string(),
+  district: z.string(),
+  address: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+export type GetUsersType = z.infer<typeof userSchema>

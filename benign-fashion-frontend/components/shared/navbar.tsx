@@ -231,7 +231,7 @@ export default function Navbar({
                         </DropdownMenuItem>
                       )}
                         <DropdownMenuItem
-                          onClick={() => router.push('/user-dashboard')}
+                          onClick={() => router.push('/profile')}
                         >
                           Profile
                         </DropdownMenuItem>

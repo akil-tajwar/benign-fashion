@@ -6,7 +6,77 @@ import {
   GetCategoryType,
   GetOrderType,
   GetProductType,
+  RegisterRequest,
+  RegisterResponse,
+  SignInRequest,
+  SignInResponse,
+  GetUsersType,
 } from '@/utils/type'
+
+export async function registerUser(credentials: RegisterRequest) {
+  return fetchApi<RegisterResponse>({
+    url: 'api/auth/register',
+    method: 'POST',
+    body: credentials,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+export async function signIn(credentials: SignInRequest ) {
+  return fetchApi<SignInResponse
+  >({
+    url: 'api/auth/login',
+    method: 'POST',
+    body: credentials,
+    headers: {
+      'Content-Type': 'application/json',
+     
+    },
+  })
+}
+
+export async function getUsers(token: string) {
+  return fetchApi<GetUsersType[]>({
+    url: 'api/auth/users',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
+// ✅ Function to fetch a user by userId
+export async function getUserByUserId(token: string, userId: number) {
+  return fetchApi<GetUsersType>({
+    url: `api/auth/user-by-userId/${userId}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
+// ✅ Update User by userId
+export async function updateUser(
+  token: string,
+  userId: number,
+  data: Partial<any> // allow partial updates
+) 
+{
+  return fetchApi<GetUsersType>({
+    url: `api/auth/users/${userId}`, // endpoint
+    method: 'PUT', // update method
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+    body: data, // send updated fields
+  })
+}
 
 // Create a new category
 export async function createCategory(token: string, data: CreateCategoryType) {
@@ -116,6 +186,17 @@ export async function createOrder(token: string, formData: CreateOrderType) {
 export async function fetchAllOrders(token: string) {
   return fetchApi<GetOrderType[]>({
     url: 'api/orders/getAll',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
+export async function fetchOrdersByUserId(token: string, userId: number) {
+  return fetchApi<GetOrderType>({
+    url: `api/orders/getByUserId/${userId}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
