@@ -7,9 +7,9 @@ import Footer from '@/components/shared/footer'
 import LayoutClientWrapper from './layout-client-wrapper'
 
 const inter = Inter({ subsets: ['latin'] })
-
+  
 export const metadata: Metadata = {
-  title: 'cloth store',
+  title: 'Benign Fashion',
   description: 'Created with Next.js, TypeScript, Tailwind CSS, and shadcn/ui',
 }
 

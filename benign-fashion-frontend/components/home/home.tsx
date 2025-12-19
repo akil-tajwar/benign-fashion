@@ -13,11 +13,14 @@ import { tokenAtom, useInitializeUser } from '@/utils/user'
 import type { GetProductType, GetCategoryType } from '@/utils/type'
 import { Toaster } from '@/components/ui/toaster'
 import { useSearch } from '@/hooks/use-search'
+import { useRouter } from 'next/navigation'
+import Loader from '@/utils/loader'
 
 export default function Home() {
   useInitializeUser()
   const [token] = useAtom(tokenAtom)
   const { toast } = useToast()
+  const router = useRouter()
   const { searchQuery, filteredProducts, setAllProducts } = useSearch()
 
   const [products, setProducts] = useState<GetProductType[]>([])
@@ -31,7 +34,7 @@ export default function Home() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false)
 
   // Pagination state for categories
-  const [categoryLimits, setCategoryLimits] = useState<Record<number, number>>(
+  const [categoryLimits, setCategoryLimits] = useState<Record<string, number>>(
     {}
   )
   const [expandedCategories, setExpandedCategories] = useState<
@@ -39,7 +42,7 @@ export default function Home() {
   >({})
 
   // Refs for scrolling
-  const categoryRefs = useRef<Record<number, HTMLElement | null>>({})
+  const categoryRefs = useRef<Record<string, HTMLElement | null>>({})
 
   // Fetch categories
   const getCategories = useCallback(async () => {
@@ -91,11 +94,6 @@ export default function Home() {
     setIsProductModalOpen(true)
   }
 
-  const closeProductModal = () => {
-    setIsProductModalOpen(false)
-    setSelectedProduct(null)
-  }
-
   const handleViewAll = (products: GetProductType[]) => {
     setCategoryLimits((prev) => ({
       ...prev,
@@ -103,7 +101,12 @@ export default function Home() {
     }))
   }
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>
+  if (loading)
+    return (
+      <div className="text-center mt-10 min-h-[45vh] flex items-center justify-center">
+        <Loader />
+      </div>
+    )
   if (error) return <p className="text-center text-red-500">{error}</p>
 
   return (
@@ -114,7 +117,8 @@ export default function Home() {
       {searchQuery && (
         <section className="container mx-auto px-3 sm:px-4 py-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Search Results for &quot;{searchQuery}&quot; ({filteredProducts.length} items)
+            Search Results for &quot;{searchQuery}&quot; (
+            {filteredProducts.length} items)
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
@@ -147,7 +151,10 @@ export default function Home() {
                   <Button
                     variant="outline"
                     className="text-sm text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white bg-white px-4 py-2"
-                    onClick={() => handleViewAll(menProducts)}
+                    onClick={() => {
+                      handleViewAll(menProducts)
+                      router.push('/men-products')
+                    }}
                   >
                     View All
                   </Button>
@@ -178,13 +185,16 @@ export default function Home() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  Kid's Collection
+                  Kid&apos;s Collection
                 </h2>
                 {kidsProducts.length > 4 && (
                   <Button
                     variant="outline"
                     className="text-sm text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white bg-white px-4 py-2"
-                    onClick={() => handleViewAll(kidsProducts)}
+                    onClick={() => {
+                      handleViewAll(kidsProducts)
+                      router.push('/men-products')
+                    }}
                   >
                     View All
                   </Button>

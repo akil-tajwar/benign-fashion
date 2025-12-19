@@ -14,6 +14,7 @@ import {
   Sparkles,
   Check,
   DollarSign,
+  FileSliders,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -21,9 +22,11 @@ import { toast } from 'sonner'
 import { CustomCombobox } from '@/utils/custom-combobox'
 import { useCart } from '@/hooks/use-cart'
 import { locationData } from '@/utils/constants'
-import { createOrder } from '@/utils/api'
+import { createOrder, getUserByUserId } from '@/utils/api'
 import { useAtom } from 'jotai'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
+import { GetUsersType } from '@/utils/type'
+import Loader from '@/utils/loader'
 
 export default function CheckoutPage() {
   useInitializeUser()
@@ -31,6 +34,7 @@ export default function CheckoutPage() {
   const [userData] = useAtom(userDataAtom)
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [userInfoLoading, setUserInfoLoading] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -41,12 +45,48 @@ export default function CheckoutPage() {
     division: '',
     district: '',
     method: 'bkash' as 'bkash' | 'nagad' | 'rocket',
+    billingPhone: '',
     transactionId: '',
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { cartItems, clearCart } = useCart()
+
+  // Fetch user info and populate form when userData.userId is available
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!userData?.userId || !token) return
+
+      try {
+        setUserInfoLoading(true)
+        const response = await getUserByUserId(token, userData.userId)
+        const userInfo: GetUsersType | null = response.data
+
+        if (userInfo) {
+          // Populate form with user data
+          setFormData((prev) => ({
+            ...prev,
+            fullName: userInfo.fullName || '',
+            phone: userInfo.phone || '',
+            email: userInfo.email || '',
+            address: userInfo.address || '',
+            division: userInfo.division || '',
+            district: userInfo.district || '',
+          }))
+
+          console.log('✅ User info loaded:', userInfo)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user info:', error)
+        toast.error('Failed to load user information')
+      } finally {
+        setUserInfoLoading(false)
+      }
+    }
+
+    fetchUserInfo()
+  }, [userData?.userId, token])
 
   // Calculate total
   const getTotalPrice = () => {
@@ -135,24 +175,27 @@ export default function CheckoutPage() {
           address: formData.address,
           division: formData.division,
           district: formData.district,
-          status: 'pending',
+          status: 'pending' as 'pending' | 'confirmed' | 'delivered',
           method: formData.method,
+          billingPhone: formData.billingPhone,
           transactionId: formData.transactionId,
           totalAmount: getTotalPrice(),
-          userId: userData.userId
+          userId: userData?.userId || null,
         },
         orderDetails: cartItems.map((item) => ({
           productId: item.productId,
-          size: item.size,
+          size: item.size as 'M' | 'L' | 'XL' | 'XXL',
           quantity: item.quantity,
           amount: item.price * item.quantity,
+          ordersMasterId: 0,
         })),
       }
 
       // Send JSON, not FormData
       const response = await createOrder(token, payload)
 
-      toast.success('Order placed successfully!')
+      // toast.success('Order placed successfully!')
+      router.push('/thank-you')
 
       // Clear the cart using the hook method
       clearCart()
@@ -167,157 +210,14 @@ export default function CheckoutPage() {
   if (cartItems.length === 0) {
     return (
       <div className="flex items-center justify-center h-[82vh]">
-        <div className="text-center max-w-2xl mx-auto">
-          {/* Animated Success Icon */}
-          <div className="relative inline-block mb-8">
-            {/* Outer glow rings */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="w-32 h-32 rounded-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 animate-ping"
-                style={{ animationDuration: '2s' }}
-              />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="w-28 h-28 rounded-full bg-gradient-to-r from-blue-400/30 to-indigo-400/30 animate-pulse"
-                style={{ animationDuration: '1.5s' }}
-              />
-            </div>
-
-            {/* Main icon container */}
-            <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border border-blue-200/50 animate-[scale-in_0.6s_ease-out]">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/0 to-indigo-400/20 animate-[spin_3s_linear_infinite]" />
-              <Check
-                className="w-12 h-12 text-blue-600 relative z-10 animate-[check-draw_0.8s_ease-out_0.3s_both]"
-                strokeWidth={3}
-              />
-            </div>
-
-            {/* Sparkles */}
-            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-blue-400 animate-[sparkle_1s_ease-in-out_0.5s_both]" />
-            <Sparkles className="absolute -bottom-2 -left-2 w-5 h-5 text-indigo-400 animate-[sparkle_1s_ease-in-out_0.7s_both]" />
-            <Sparkles className="absolute top-0 -left-4 w-4 h-4 text-sky-400 animate-[sparkle_1s_ease-in-out_0.9s_both]" />
-          </div>
-
-          {/* Thank you text */}
-          <h2 className="text-5xl font-bold mb-4 animate-[fade-up_0.8s_ease-out_0.4s_both]">
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">
-              Thank You
-            </span>
-          </h2>
-
-          <p className="text-xl text-gray-700 mb-3 font-light animate-[fade-up_0.8s_ease-out_0.6s_both]">
-            for choosing us
-          </p>
-
-          {/* Decorative line */}
-          <div className="flex items-center justify-center gap-3 mb-8 animate-[fade-up_0.8s_ease-out_0.8s_both]">
-            <div className="h-px w-12 bg-gradient-to-r from-transparent to-blue-300" />
-            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-            <div className="h-px w-12 bg-gradient-to-l from-transparent to-blue-300" />
-          </div>
-
-          <p className="text-gray-600 mb-10 leading-relaxed max-w-md mx-auto animate-[fade-up_0.8s_ease-out_1s_both]">
-            We appreciate your trust in our service. Your satisfaction is our
-            priority, and we look forward to serving you again.
-          </p>
-
-          {/* Continue Shopping Button */}
-          <button
-            onClick={() => router.push('/')}
-            className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600  text-white text-lg rounded font-semibold shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-[fade-up_0.8s_ease-out_1.2s_both]"
-          >
-            {/* Button glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
-            <span className="relative flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              Continue Shopping
-            </span>
-          </button>
-
-          {/* Floating particles */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-blue-300/40 animate-[float_4s_ease-in-out_infinite]" />
-            <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 rounded-full bg-indigo-300/40 animate-[float_5s_ease-in-out_1s_infinite]" />
-            <div className="absolute bottom-1/4 left-1/3 w-2.5 h-2.5 rounded-full bg-sky-300/30 animate-[float_6s_ease-in-out_2s_infinite]" />
-          </div>
-
-          <style jsx>{`
-            @keyframes scale-in {
-              0% {
-                transform: scale(0);
-                opacity: 0;
-              }
-              50% {
-                transform: scale(1.1);
-              }
-              100% {
-                transform: scale(1);
-                opacity: 1;
-              }
-            }
-
-            @keyframes check-draw {
-              0% {
-                stroke-dasharray: 100;
-                stroke-dashoffset: 100;
-                opacity: 0;
-              }
-              50% {
-                opacity: 1;
-              }
-              100% {
-                stroke-dasharray: 100;
-                stroke-dashoffset: 0;
-                opacity: 1;
-              }
-            }
-
-            @keyframes sparkle {
-              0%,
-              100% {
-                transform: scale(0) rotate(0deg);
-                opacity: 0;
-              }
-              50% {
-                transform: scale(1) rotate(180deg);
-                opacity: 1;
-              }
-            }
-
-            @keyframes fade-up {
-              0% {
-                transform: translateY(20px);
-                opacity: 0;
-              }
-              100% {
-                transform: translateY(0);
-                opacity: 1;
-              }
-            }
-
-            @keyframes float {
-              0%,
-              100% {
-                transform: translateY(0) translateX(0);
-              }
-              33% {
-                transform: translateY(-20px) translateX(10px);
-              }
-              66% {
-                transform: translateY(-10px) translateX(-10px);
-              }
-            }
-          `}</style>
-        </div>
+        <Loader />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen py-8">
+      <div className="w-4/5 mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p className="text-gray-600">Complete your purchase</p>
@@ -338,6 +238,11 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold text-gray-900">
                   Personal Information
                 </h2>
+                {userInfoLoading && (
+                  <span className="text-sm text-gray-500 ml-auto">
+                    Loading...
+                  </span>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -357,6 +262,7 @@ export default function CheckoutPage() {
                     }}
                     className={`mt-1 ${errors.fullName ? 'border-red-500' : ''}`}
                     placeholder="Enter your full name"
+                    disabled={userInfoLoading}
                   />
                   {errors.fullName && (
                     <p className="text-red-500 text-xs mt-1">
@@ -383,6 +289,7 @@ export default function CheckoutPage() {
                       }}
                       className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
                       placeholder="01XXXXXXXXX"
+                      disabled={userInfoLoading}
                     />
                   </div>
                   {errors.phone && (
@@ -409,6 +316,7 @@ export default function CheckoutPage() {
                       }}
                       className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
                       placeholder="your.email@example.com"
+                      disabled={userInfoLoading}
                     />
                   </div>
                   {errors.email && (
@@ -450,6 +358,7 @@ export default function CheckoutPage() {
                       }
                       onChange={handleDivisionChange}
                       placeholder="Select division"
+                      disabled={userInfoLoading}
                     />
                   </div>
                   {errors.division && (
@@ -479,7 +388,7 @@ export default function CheckoutPage() {
                       }
                       onChange={handleDistrictChange}
                       placeholder="Select district"
-                      disabled={!formData.division}
+                      disabled={!formData.division || userInfoLoading}
                     />
                   </div>
                   {errors.district && (
@@ -508,6 +417,7 @@ export default function CheckoutPage() {
                     }`}
                     rows={3}
                     placeholder="House/Flat No, Road, Area"
+                    disabled={userInfoLoading}
                   />
                   {errors.address && (
                     <p className="text-red-500 text-xs mt-1">
@@ -529,6 +439,50 @@ export default function CheckoutPage() {
                 </h2>
               </div>
 
+              {/* Payment Instructions */}
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="bg-blue-50 border flex-1 border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    Payment Instructions:
+                  </h3>
+                  <ol className="text-xs text-gray-700 space-y-1 list-decimal list-inside">
+                    <li>Select your payment method below</li>
+                    <li>Scan the QR code or use the number</li>
+                    <li>Pay at least 100 tk to confirm your order</li>
+                    <li>Enter the Transaction ID</li>
+                  </ol>
+                </div>
+                <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg w-full sm:w-40 h-40 bg-gray-100 flex-shrink-0">
+                  {formData.method === 'bkash' && (
+                    <Image
+                      src="/bkashQR.jpg"
+                      alt="bKash QR Code"
+                      width={128}
+                      height={128}
+                      className="w-32 h-32 object-contain rounded-lg"
+                    />
+                  )}
+                  {formData.method === 'nagad' && (
+                    <Image
+                      src="/nagadQR.jpg"
+                      alt="Nagad QR Code"
+                      width={128}
+                      height={128}
+                      className="w-32 h-32 object-contain rounded-lg"
+                    />
+                  )}
+                  {formData.method === 'rocket' && (
+                    <Image
+                      src="/rocketQR.jpg"
+                      alt="Rocket QR Code"
+                      width={128}
+                      height={128}
+                      className="w-32 h-32 object-contain rounded-lg"
+                    />
+                  )}
+                </div>
+              </div>
+
               <RadioGroup
                 value={formData.method}
                 onValueChange={(value) =>
@@ -539,7 +493,10 @@ export default function CheckoutPage() {
                 }
                 className="space-y-3"
               >
-                <div className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-pink-500 transition-colors cursor-pointer">
+                <div
+                  onClick={() => setFormData({ ...formData, method: 'bkash' })}
+                  className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-pink-500 transition-colors cursor-pointer"
+                >
                   <RadioGroupItem value="bkash" id="bkash" />
                   <Label
                     htmlFor="bkash"
@@ -558,7 +515,10 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-orange-500 transition-colors cursor-pointer">
+                <div
+                  onClick={() => setFormData({ ...formData, method: 'nagad' })}
+                  className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-orange-500 transition-colors cursor-pointer"
+                >
                   <RadioGroupItem value="nagad" id="nagad" />
                   <Label
                     htmlFor="nagad"
@@ -577,7 +537,10 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-purple-500 transition-colors cursor-pointer">
+                <div
+                  onClick={() => setFormData({ ...formData, method: 'rocket' })}
+                  className="flex items-center space-x-3 border-2 border-gray-200 rounded-lg p-4 hover:border-purple-500 transition-colors cursor-pointer"
+                >
                   <RadioGroupItem value="rocket" id="rocket" />
                   <Label
                     htmlFor="rocket"
@@ -597,23 +560,55 @@ export default function CheckoutPage() {
                 </div>
               </RadioGroup>
 
-              <div className="mt-6">
+              <div className="my-6">
+                <Label
+                  htmlFor="billingPhone"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Billing Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative mt-1">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="billingPhone"
+                    value={formData.billingPhone}
+                    onChange={(e) => {
+                      setFormData({ ...formData, billingPhone: e.target.value })
+                      setErrors({ ...errors, billingPhone: '' })
+                    }}
+                    className={`pl-10 ${errors.billingPhone ? 'border-red-500' : ''}`}
+                    placeholder="01XXXXXXXXX"
+                    disabled={userInfoLoading}
+                  />
+                </div>
+                {errors.billingPhone && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
+              </div>
+
+              <div>
                 <Label
                   htmlFor="transactionId"
                   className="text-sm font-medium text-gray-700"
                 >
                   Transaction ID <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="transactionId"
-                  value={formData.transactionId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, transactionId: e.target.value })
-                    setErrors({ ...errors, transactionId: '' })
-                  }}
-                  className={`mt-1 ${errors.transactionId ? 'border-red-500' : ''}`}
-                  placeholder="Enter transaction ID"
-                />
+                <div className="relative">
+                  <FileSliders className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="transactionId"
+                    value={formData.transactionId}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        transactionId: e.target.value,
+                      })
+                      setErrors({ ...errors, transactionId: '' })
+                    }}
+                    className={`mt-1 pl-10 ${errors.transactionId ? 'border-red-500' : ''}`}
+                    placeholder="Enter transaction ID"
+                  />
+                </div>
                 {errors.transactionId && (
                   <p className="text-red-500 text-xs mt-1">
                     {errors.transactionId}
@@ -683,7 +678,9 @@ export default function CheckoutPage() {
 
               <Button
                 type="submit"
-                disabled={isLoading || cartItems.length === 0}
+                disabled={
+                  isLoading || cartItems.length === 0 || userInfoLoading
+                }
                 className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white h-12 text-lg font-semibold"
               >
                 {isLoading ? 'Processing...' : 'Place Order'}

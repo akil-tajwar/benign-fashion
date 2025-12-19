@@ -40,10 +40,10 @@ export default function ProductCard({
     // Add to cart immediately when size is selected
     addToCart(product, size, 1)
 
-    toast({
-      title: 'Added to Cart',
-      description: `${product.product.name} (Size: ${size}) has been added to your cart.`,
-    })
+    // toast({
+    //   title: 'Added to Cart',
+    //   description: `${product.product.name} (Size: ${size}) has been added to your cart.`,
+    // })
 
     // Reset after a short delay
     setTimeout(() => {

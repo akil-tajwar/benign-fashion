@@ -15,7 +15,7 @@ export const createOrder = async (
     const [master] = await trx
       .insert(ordersMasterModel)
       .values({
-        userId: payload.orderMaster.userId ?? null,
+        userId: payload.orderMaster.userId ?? 0,
         fullName: payload.orderMaster.fullName,
         division: payload.orderMaster.division,
         district: payload.orderMaster.district,
@@ -24,7 +24,8 @@ export const createOrder = async (
         email: payload.orderMaster.email ?? null,
         status: payload.orderMaster.status,
         method: payload.orderMaster.method,
-        transactionId: payload.orderMaster.transactionId ?? null,
+        billingPhone: payload.orderMaster.phone,
+        transactionId: payload.orderMaster.transactionId ?? '',
         totalAmount: payload.orderMaster.totalAmount,
       })
       .$returningId()

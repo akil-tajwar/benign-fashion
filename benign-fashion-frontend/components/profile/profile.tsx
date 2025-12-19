@@ -19,6 +19,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { CustomCombobox } from '@/utils/custom-combobox'
 import { locationData } from '@/utils/constants'
 import { toast } from '@/hooks/use-toast'
@@ -29,9 +37,7 @@ type TabType = 'user-info' | 'my-orders'
 export default function Profile() {
   useInitializeUser()
   const [userData] = useAtom(userDataAtom)
-  //   console.log('🚀 ~ Profile ~ userData:', userData)
   const [token] = useAtom(tokenAtom)
-  //   console.log('🚀 ~ Profile ~ token:', token)
 
   const [activeTab, setActiveTab] = useState<TabType>('user-info')
   const [userInfo, setUserInfo] = useState<GetUsersType | null>(null)
@@ -50,8 +56,6 @@ export default function Profile() {
   // Fetch user info
   useEffect(() => {
     const fetchUserInfo = async () => {
-      //   if (!userData?.userId) return
-
       try {
         setLoading(true)
         const response = await getUserByUserId(token, userData.userId)
@@ -91,8 +95,8 @@ export default function Profile() {
         setLoading(true)
         const response = await fetchOrdersByUserId(token, userData?.userId)
         console.log('🚀 ~ fetchOrders ~ userData?.userId:', userData?.userId)
-        setOrders(response.data || [])
-        console.log("🚀 ~ fetchOrders ~ response.data:", response.data)
+        setOrders(Array.isArray(response.data) ? response.data : response.data ? [response.data] : [])
+        console.log('🚀 ~ fetchOrders ~ response.data:', response.data)
       } catch (error) {
         console.error('Failed to fetch orders:', error)
         toast({
@@ -145,7 +149,7 @@ export default function Profile() {
 
       // Refresh user info
       const response = await getUserByUserId(token, userData.userId)
-      setUserInfo(response)
+      setUserInfo(response.data)
       setIsEditing(false)
 
       toast({
@@ -198,79 +202,78 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen py-8">
       <div className="w-4/5 mx-auto">
-        {/* Profile Header Section */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-gray-100">
-          <div className="relative h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptLTEyIDEyYzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L2c+PC9zdmc+')] opacity-30"></div>
-          </div>
-
-          <div className="px-8 pb-8">
-            <div className="flex flex-col items-start gap-6 -mt-16">
-              {/* Avatar */}
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-8xl font-bold shadow-2xl ring-4 ring-white transform transition-transform group-hover:scale-105">
-                  {getInitial()}
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-                </div>
-              </div>
-
-              {/* User Info */}
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                  {userInfo?.fullName || 'User'}
-                </h1>
-                <p className="text-gray-500 text-lg mb-3">
-                  @{userInfo?.username || 'username'}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  {userInfo?.createdAt && (
-                    <span className=" text-gray-700 rounded-full text-sm font-medium flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      Joined - {formatDate(userInfo.createdAt)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs and Content */}
+        {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Tab Navigation */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-xl shadow-lg p-2 border border-gray-100">
-              <button
-                onClick={() => setActiveTab('user-info')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  activeTab === 'user-info'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <User className="w-5 h-5" />
-                <span className="font-medium">User Info</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('my-orders')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 mt-2 ${
-                  activeTab === 'my-orders'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Package className="w-5 h-5" />
-                <span className="font-medium">My Orders</span>
-              </button>
+          {/* Profile Header Section - Now on the left */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 sticky top-28 ">
+              <div className="relative h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptLTEyIDEyYzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L2c+PC9zdmc+')] opacity-30"></div>
+              </div>
+
+              <div className="px-6 pb-6">
+                <div className="flex flex-col items-center -mt-16">
+                  {/* Avatar */}
+                  <div className="relative group mb-4">
+                    <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-5xl font-bold shadow-2xl ring-4 ring-white transform transition-transform group-hover:scale-105">
+                      {getInitial()}
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  {/* User Info */}
+                  <div className="text-center w-full">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                      {userInfo?.fullName || 'User'}
+                    </h1>
+                    <p className="text-gray-500 text-base mb-3">
+                      @{userInfo?.username || 'username'}
+                    </p>
+                    {userInfo?.createdAt && (
+                      <div className="inline-flex items-center gap-1.5 text-gray-700 text-sm font-medium bg-gray-50 px-4 py-2 rounded-full">
+                        <Calendar className="w-3.5 h-3.5" />
+                        Joined {formatDate(String(userInfo.createdAt))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="lg:col-span-9">
+          {/* Tab Content - Now on the right */}
+          <div className="lg:col-span-8">
+            {/* Tab Navigation - Now at the top */}
+            <div className="bg-white rounded-xl shadow-lg p-2 border border-gray-100 mb-6">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveTab('user-info')}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
+                    activeTab === 'user-info'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <User className="w-5 h-5" />
+                  <span className="font-medium">User Info</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('my-orders')}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
+                    activeTab === 'my-orders'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Package className="w-5 h-5" />
+                  <span className="font-medium">My Orders</span>
+                </button>
+              </div>
+            </div>
             <div className="bg-white rounded-xl shadow-lg border border-gray-100">
               {/* User Info Tab */}
               {activeTab === 'user-info' && (
@@ -525,72 +528,73 @@ export default function Profile() {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {orders.map((order, index) => (
-                        <div
-                          key={index}
-                          className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Date</p>
-                              <p className="font-medium text-gray-900">
+                    <div className="rounded-md border overflow-x-scroll">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">Sl No.</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Items</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">
+                              Total Amount
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {orders.map((order, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                {index + 1}.
+                              </TableCell>
+                              <TableCell>
                                 {formatDate(order.orderMaster.createdAt)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Total Amount
-                              </p>
-                              <p className="font-bold text-blue-600 text-lg">
-                                ৳{order.orderMaster.totalAmount?.toFixed(2)}
-                              </p>
-                            </div>
-                            <div>
-                              <span
-                                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                  order.orderMaster.status === 'delivered'
-                                    ? 'bg-green-100 text-green-700'
-                                    : order.orderMaster.status === 'processing'
-                                      ? 'bg-blue-100 text-blue-700'
-                                      : order.orderMaster.status === 'pending'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : 'bg-gray-100 text-gray-700'
-                                }`}
-                              >
-                                {order.status?.toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
-
-                          {order.orderDetails &&
-                            order.orderDetails.length > 0 && (
-                              <div className="border-t border-gray-100 pt-4 mt-4">
-                                <p className="text-sm font-medium text-gray-700 mb-3">
-                                  Order Items:
-                                </p>
-                                <div className="space-y-2">
-                                  {order.orderDetails.map(
-                                    (item: any, idx: number) => (
-                                      <div
-                                        key={idx}
-                                        className="flex items-center justify-between text-sm"
-                                      >
-                                        <span className="text-gray-600">
-                                          {item.productName || 'Product'}{' '}
-                                          (Size: {item.size}) x {item.quantity}
-                                        </span>
-                                        <span className="font-medium text-gray-900">
-                                          ৳{item.amount?.toFixed(2)}
-                                        </span>
-                                      </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-1">
+                                  {order.orderDetails &&
+                                  order.orderDetails.length > 0 ? (
+                                    order.orderDetails.map(
+                                      (item: any, idx: number) => (
+                                        <div
+                                          key={idx}
+                                          className="text-sm text-gray-600"
+                                        >
+                                          {item.productName || 'Product'} (
+                                          {item.size}) x {item.quantity}
+                                        </div>
+                                      )
                                     )
+                                  ) : (
+                                    <span className="text-sm text-gray-400">
+                                      No items
+                                    </span>
                                   )}
                                 </div>
-                              </div>
-                            )}
-                        </div>
-                      ))}
+                              </TableCell>
+                              <TableCell>
+                                <span
+                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                    order.orderMaster.status === 'delivered'
+                                      ? 'bg-green-100 text-green-700'
+                                      : order.orderMaster.status ===
+                                          'processing'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : order.orderMaster.status === 'pending'
+                                          ? 'bg-yellow-100 text-yellow-700'
+                                          : 'bg-gray-100 text-gray-700'
+                                  }`}
+                                >
+                                  {order.orderMaster.status?.toUpperCase()}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-right font-bold text-blue-600">
+                                ৳{order.orderMaster.totalAmount?.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
                   )}
                 </div>
