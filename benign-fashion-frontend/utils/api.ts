@@ -24,15 +24,13 @@ export async function registerUser(credentials: RegisterRequest) {
   })
 }
 
-export async function signIn(credentials: SignInRequest ) {
-  return fetchApi<SignInResponse
-  >({
+export async function signIn(credentials: SignInRequest) {
+  return fetchApi<SignInResponse>({
     url: 'api/auth/login',
     method: 'POST',
     body: credentials,
     headers: {
       'Content-Type': 'application/json',
-     
     },
   })
 }
@@ -65,8 +63,7 @@ export async function updateUser(
   token: string,
   userId: number,
   data: Partial<any> // allow partial updates
-) 
-{
+) {
   return fetchApi<GetUsersType>({
     url: `api/auth/users/${userId}`, // endpoint
     method: 'PUT', // update method
@@ -206,9 +203,19 @@ export async function fetchOrdersByUserId(token: string, userId: number) {
 }
 
 export async function confirmOrder(token: string, id: number) {
-  return fetchApiWithFile<CreateProductType>({
+  return fetchApiWithFile<GetProductType>({
     url: `api/orders/confirm-order/${id}`,
-    method: 'PUT',
+    method: 'PATCH',
+    headers: {
+      Authorization: `${token}`,
+    },
+  })
+}
+
+export async function completeOrder(token: string, id: number) {
+  return fetchApiWithFile<GetProductType>({
+    url: `api/orders/complete-order/${id}`,
+    method: 'PATCH',
     headers: {
       Authorization: `${token}`,
     },
@@ -216,8 +223,8 @@ export async function confirmOrder(token: string, id: number) {
 }
 
 export async function deleteOrder(id: number, token: string) {
-  return fetchApi<{ claimType: string; id: number }>({
-    url: `api/claim/delete-order/${id}`,
+  return fetchApi<{ id: number }>({
+    url: `api/orders/delete-order/${id}`,
     method: 'DELETE',
     headers: {
       Authorization: token,

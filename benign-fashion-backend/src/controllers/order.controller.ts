@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import {
+  completeOrder,
+  confirmOrder,
   createOrder,
+  deleteOrder,
   getAllOrders,
   getOrdersByUserId,
 } from "../services/order.service";
@@ -101,3 +104,61 @@ export const getOrdersByUserIdController = async (
   }
 }
 
+export const deleteOrderController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const orderMasterId = Number(req.params.orderMasterId)
+
+    const result = await deleteOrder(orderMasterId)
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      orderMasterId: result.orderMasterId,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to delete order',
+    })
+  }
+}
+
+export const confirmOrderController = async (req: Request, res: Response) => {
+  try {
+    const orderMasterId = Number(req.params.id)
+    console.log("🚀 ~ confirmOrderController ~ req.params.id:", req.params.id)
+
+    const result = await confirmOrder(orderMasterId)
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to confirm order',
+    })
+  }
+}
+
+export const completeOrderController = async (req: Request, res: Response) => {
+  try {
+    const orderMasterId = Number(req.params.id)
+
+    const result = await completeOrder(orderMasterId)
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    })
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to complete order',
+    })
+  }
+}

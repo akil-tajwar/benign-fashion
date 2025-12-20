@@ -21,7 +21,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { fetchAllOrders } from '@/utils/api'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { completeOrder, fetchAllOrders } from '@/utils/api'
 import type { GetOrderType } from '@/utils/type'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 import { useAtom } from 'jotai'
@@ -36,6 +46,8 @@ type SortColumn =
   | 'totalAmount'
   | 'method'
   | 'createdAt'
+  | 'address'
+  | 'status'
 type SortDirection = 'asc' | 'desc'
 
 export default function ConfirmedOrders() {
@@ -54,6 +66,10 @@ export default function ConfirmedOrders() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false)
+  const [orderToComplete, setOrderToComplete] = useState<number | null>(null)
+  const [isCompleting, setIsCompleting] = useState(false)
+
   const fetchOrdersData = useCallback(async () => {
     if (!token) return
     setIsLoading(true)
@@ -66,7 +82,9 @@ export default function ConfirmedOrders() {
       } else {
         // Filter only confirmed orders
         const confirmedOrders = (response.data ?? []).filter(
-          (order) => order.orderMaster.status === 'confirmed'
+          (order) =>
+            order.orderMaster.status === 'confirmed' ||
+            order.orderMaster.status === 'delivered'
         )
         setOrders(confirmedOrders)
       }
@@ -162,9 +180,44 @@ export default function ConfirmedOrders() {
     }
   }
 
-  const handleCompleteOrder = (orderId: number) => {
-    // setOrderToConfirm(orderId)
-    // setIsConfirmDialogOpen(true)
+  const handleCompleteClick = (orderId: number) => {
+    setOrderToComplete(orderId)
+    setIsCompleteDialogOpen(true)
+  }
+
+  const handleCompleteOrder = async () => {
+    if (!orderToComplete || !token) return
+
+    try {
+      setIsCompleting(true)
+
+      const response = await completeOrder(token, orderToComplete)
+
+      if ((response as any)?.error) {
+        toast({
+          title: 'Error',
+          description:
+            (response as any).error?.message || 'Failed to complete order',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Order marked as delivered',
+        })
+        fetchOrdersData()
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to complete order',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsCompleting(false)
+      setIsCompleteDialogOpen(false)
+      setOrderToComplete(null)
+    }
   }
 
   const formatDate = (dateString?: string) => {
@@ -265,11 +318,20 @@ export default function ConfirmedOrders() {
                 </div>
               </TableHead>
               <TableHead
-                // onClick={() => handleSort('address')}
+                onClick={() => handleSort('address')}
                 className="cursor-pointer"
               >
                 <div className="flex items-center gap-1">
                   <span>Address</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('status')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>status</span>
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </TableHead>
@@ -312,12 +374,20 @@ export default function ConfirmedOrders() {
                   <TableCell className="max-w-xs truncate">
                     {order.orderMaster.address}
                   </TableCell>
+                  <TableCell className="text-sm">
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${order.orderMaster.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : order.orderMaster.status === 'confirmed' ? 'bg-blue-100 text-blue-800' : order.orderMaster.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+                    >
+                      {order.orderMaster.status}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleCompleteOrder(order.orderMaster.id!)}
-                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                      disabled={order.orderMaster.status === 'delivered'}
+                      onClick={() => handleCompleteClick(order.orderMaster.id!)}
+                      className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Complete
@@ -365,6 +435,33 @@ export default function ConfirmedOrders() {
           </PaginationContent>
         </Pagination>
       </div>
+      <AlertDialog
+        open={isCompleteDialogOpen}
+        onOpenChange={setIsCompleteDialogOpen}
+      >
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this order as delivered? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCompleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCompleteOrder}
+              disabled={isCompleting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isCompleting ? 'Completing...' : 'Complete Order'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

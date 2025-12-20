@@ -121,3 +121,64 @@ export const getOrdersByUserId = async (userId: number) => {
 
   return orders
 }
+
+export const deleteOrder = async (orderMasterId: number) => {
+  if (!orderMasterId || Number.isNaN(orderMasterId)) {
+    throw new Error('Invalid orderMasterId')
+  }
+
+  return await db.transaction(async (trx) => {
+    // 1️⃣ Delete order details first
+    await trx
+      .delete(ordersDetailsModel)
+      .where(eq(ordersDetailsModel.ordersMasterId, orderMasterId))
+
+    // 2️⃣ Delete order master
+    const result = await trx
+      .delete(ordersMasterModel)
+      .where(eq(ordersMasterModel.id, orderMasterId))
+
+    return {
+      orderMasterId,
+      message: 'Order deleted successfully',
+    }
+  })
+}
+
+export const confirmOrder = async (orderMasterId: number) => {
+  if (!orderMasterId || Number.isNaN(orderMasterId)) {
+    throw new Error('Invalid orderMasterId')
+  }
+
+  const result = await db
+    .update(ordersMasterModel)
+    .set({
+      status: 'confirmed',
+    })
+    .where(eq(ordersMasterModel.id, orderMasterId))
+
+  return {
+    orderMasterId,
+    status: 'confirmed',
+    message: 'Order confirmed successfully',
+  }
+}
+
+export const completeOrder = async (orderMasterId: number) => {
+  if (!orderMasterId || Number.isNaN(orderMasterId)) {
+    throw new Error('Invalid orderMasterId')
+  }
+
+  const result = await db
+    .update(ordersMasterModel)
+    .set({
+      status: 'delivered',
+    })
+    .where(eq(ordersMasterModel.id, orderMasterId))
+
+  return {
+    orderMasterId,
+    status: 'delivered',
+    message: 'Order marked as delivered',
+  }
+}

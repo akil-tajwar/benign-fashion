@@ -46,6 +46,7 @@ type SortColumn =
   | 'totalAmount'
   | 'method'
   | 'createdAt'
+  | 'status'
 type SortDirection = 'asc' | 'desc'
 
 export default function OrdersToConfirm() {
@@ -198,7 +199,8 @@ export default function OrdersToConfirm() {
         console.error('Error confirming order:', (response as any).error)
         toast({
           title: 'Error',
-          description: (response as any).error?.message || 'Failed to confirm order',
+          description:
+            (response as any).error?.message || 'Failed to confirm order',
           variant: 'destructive',
         })
       } else {
@@ -358,6 +360,15 @@ export default function OrdersToConfirm() {
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </TableHead>
+              <TableHead
+                onClick={() => handleSort('status')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>status</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -391,6 +402,14 @@ export default function OrdersToConfirm() {
                   <TableCell>
                     {formatDate(order.orderMaster.createdAt)}
                   </TableCell>
+                  <TableCell className="text-sm">
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${order.orderMaster.status === 'pending'? 'bg-yellow-100 text-yellow-800': order.orderMaster.status === 'confirmed'? 'bg-blue-100 text-blue-800': order.orderMaster.status === 'delivered'? 'bg-green-100 text-green-800': 'bg-gray-100 text-gray-800'}`}
+                    >
+                      {order.orderMaster.status}
+                    </span>
+                  </TableCell>
+
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
@@ -463,7 +482,7 @@ export default function OrdersToConfirm() {
         open={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Order</AlertDialogTitle>
             <AlertDialogDescription>
@@ -491,7 +510,7 @@ export default function OrdersToConfirm() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Order</AlertDialogTitle>
             <AlertDialogDescription>
