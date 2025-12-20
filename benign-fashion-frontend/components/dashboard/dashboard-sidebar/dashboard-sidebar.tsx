@@ -64,11 +64,11 @@ export function DashboardSidebar() {
       icon: Check,
       href: '/dashboard/confirmed-orders',
     },
-    {
-      title: 'Users',
-      icon: UserCog,
-      href: '/dashboard/users',
-    },
+    // {
+    //   title: 'Users',
+    //   icon: UserCog,
+    //   href: '/dashboard/users',
+    // },
   ]
 
   // Check if the current path is in the submenu items

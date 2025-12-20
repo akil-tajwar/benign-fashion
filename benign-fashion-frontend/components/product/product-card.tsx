@@ -93,14 +93,14 @@ export default function ProductCard({
             <div className="flex items-center space-x-2">
               <span className="text-base md:text-lg font-bold text-gray-900">
                 ৳
-                {(
-                  product.product.price *
-                  (1 - product.product.discount / 100)
-                ).toFixed(2)}
+                {Math.round(
+                  product.product.price * (1 - product.product.discount / 100)
+                )}
               </span>
+
               {product.product.discount > 0 && (
                 <span className="text-xs text-gray-400 line-through">
-                  ৳{product.product.price.toFixed(2)}
+                  ৳{Math.round(product.product.price)}
                 </span>
               )}
             </div>

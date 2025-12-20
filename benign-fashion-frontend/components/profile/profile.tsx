@@ -607,7 +607,7 @@ export default function Profile() {
                                 </span>
                               </TableCell>
                               <TableCell className="text-right font-bold text-blue-600">
-                                ৳{order.orderMaster.totalAmount?.toFixed(2)}
+                                ৳{Math.round(order.orderMaster.totalAmount)}
                               </TableCell>
                             </TableRow>
                           ))}

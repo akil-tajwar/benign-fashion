@@ -6,13 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
-  ShoppingCart,
   MapPin,
   Phone,
   Mail,
   User,
-  Sparkles,
-  Check,
   DollarSign,
   FileSliders,
 } from 'lucide-react'
@@ -179,14 +176,14 @@ export default function CheckoutPage() {
           method: formData.method,
           billingPhone: formData.billingPhone,
           transactionId: formData.transactionId,
-          totalAmount: getTotalPrice(),
+          totalAmount: Math.round(getTotalPrice()),
           userId: userData?.userId || null,
         },
         orderDetails: cartItems.map((item) => ({
           productId: item.productId,
           size: item.size as 'M' | 'L' | 'XL' | 'XXL',
           quantity: item.quantity,
-          amount: item.price * item.quantity,
+          amount: Math.round(item.price * item.quantity),
           ordersMasterId: 0,
         })),
       }
@@ -652,7 +649,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between items-center mt-3">
                       <p className="font-semibold text-sm">
-                        ৳{(item.price * item.quantity).toFixed(2)}
+                        ৳{Math.round(item.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -662,7 +659,7 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Subtotal</span>
-                  <span>৳{getTotalPrice().toFixed(2)}</span>
+                  <span>৳{Math.round(getTotalPrice())}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Delivery Fee</span>
@@ -671,7 +668,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-200">
                   <span>Total</span>
                   <span className="text-blue-600">
-                    ৳{getTotalPrice().toFixed(2)}
+                    ৳{Math.round(getTotalPrice())}
                   </span>
                 </div>
               </div>

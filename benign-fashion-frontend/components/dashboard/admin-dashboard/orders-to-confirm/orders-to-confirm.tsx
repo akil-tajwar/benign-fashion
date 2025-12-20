@@ -398,7 +398,7 @@ export default function OrdersToConfirm() {
                   <TableCell className="uppercase">
                     {order.orderMaster.method}
                   </TableCell>
-                  <TableCell>₹{order.orderMaster.totalAmount}</TableCell>
+                  <TableCell>৳{order.orderMaster.totalAmount}</TableCell>
                   <TableCell>
                     {formatDate(order.orderMaster.createdAt)}
                   </TableCell>

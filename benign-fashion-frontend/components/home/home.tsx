@@ -37,9 +37,6 @@ export default function Home() {
   const [categoryLimits, setCategoryLimits] = useState<Record<string, number>>(
     {}
   )
-  const [expandedCategories, setExpandedCategories] = useState<
-    Record<number, boolean>
-  >({})
 
   // Refs for scrolling
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({})

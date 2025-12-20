@@ -6,6 +6,7 @@ import { useCart } from '@/hooks/use-cart'
 import { ShoppingCart, Plus, Minus, X, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function CartSidebar() {
   const {
@@ -18,15 +19,37 @@ export default function CartSidebar() {
   } = useCart()
   const router = useRouter()
 
-  if (!isCartOpen) return null
+  // Lock body scroll when cart is open
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isCartOpen])
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <>
+      {/* Overlay */}
+      {isCartOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          onClick={() => setIsCartOpen(false)}
+        />
+      )}
+
+      {/* Cart Sidebar with slide-in animation */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={() => setIsCartOpen(false)}
-      />
-      <div className="absolute right-0 top-0 h-full w-full sm:w-full sm:max-w-md bg-white shadow-xl flex flex-col">
+        className={`
+          fixed right-0 top-0 h-full w-full sm:w-full sm:max-w-md 
+          bg-white shadow-xl flex flex-col z-50
+          transform transition-transform duration-300 ease-in-out
+          ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}
+        `}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold">
             Shopping Cart ({cartItems.length})
@@ -82,7 +105,7 @@ export default function CartSidebar() {
                     </div>
                     <div className="flex justify-between items-center mt-5">
                       <p className="font-semibold text-lg">
-                        ৳{(item.price * item.quantity).toFixed(2)}
+                        ৳{Math.round(item.price * item.quantity)}
                       </p>
                       <div className="flex items-center space-x-2 mr-3 border-2 rounded border-gray-300">
                         <button
@@ -124,7 +147,7 @@ export default function CartSidebar() {
         <div className="border-t border-gray-200 p-4 space-y-3">
           <div className="flex justify-between text-lg font-semibold">
             <span>Total:</span>
-            <span className="text-blue-600">৳{getTotalPrice().toFixed(2)}</span>
+            <span className="text-blue-600">৳{Math.round(getTotalPrice())}</span>
           </div>
           <Button
             onClick={() => {
@@ -138,6 +161,6 @@ export default function CartSidebar() {
           </Button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

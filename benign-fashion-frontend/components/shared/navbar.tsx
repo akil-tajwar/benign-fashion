@@ -1,10 +1,18 @@
-// Updated Navbar Component with Hover Dropdowns + Fullscreen Search Overlay
+// Fully Responsive Navbar with Hamburger Menu + Sliding Sidebar
 'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Search, User, ShoppingCart, X, ChevronDown } from 'lucide-react'
+import {
+  Search,
+  User,
+  ShoppingCart,
+  X,
+  ChevronDown,
+  Menu,
+  ChevronRight,
+} from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import {
@@ -56,8 +64,12 @@ export default function Navbar({
 
   const [hoverMenu, setHoverMenu] = useState<string | null>(null)
   const [showSearchOverlay, setShowSearchOverlay] = useState(false)
-  const router = useRouter()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(
+    null
+  )
 
+  const router = useRouter()
   const { cartItems } = useCart()
 
   useEffect(() => {
@@ -76,38 +88,68 @@ export default function Navbar({
     loadData()
   }, [token])
 
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isSidebarOpen])
+
+  const handleCategoryClick = (categoryId: number, categoryPath: string) => {
+    setIsSidebarOpen(false)
+    onCategoryClick(categoryId)
+    router.push(categoryPath)
+  }
+
   return (
     <>
       {/* NAVBAR */}
       {!showSearchOverlay && (
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <div className="max-w-11/12 mx-auto px-4 h-16 flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="">
-              <Image
-                src="/logo.jpg"
-                alt="Logo"
-                width={50}
-                height={50}
-                className="object-contain rounded-full"
-              />
-            </Link>
+            {/* LEFT SECTION - Hamburger + Logo */}
+            <div className="flex items-center gap-3">
+              {/* HAMBURGER MENU - Visible only on mobile/tablet */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden text-gray-700 hover:text-blue-600"
+                aria-label="Menu"
+              >
+                <Menu className="w-7 h-7" />
+              </button>
 
-            {/* CATEGORY HOVER MENU */}
+              {/* Logo */}
+              <Link href="/" className="">
+                <Image
+                  src="/logo.jpg"
+                  alt="Logo"
+                  width={50}
+                  height={50}
+                  className="object-contain rounded-full"
+                />
+              </Link>
+            </div>
+
+            {/* CATEGORY HOVER MENU - Desktop Only */}
             <div className="hidden lg:flex gap-6 text-gray-700 font-medium relative">
               <Link
                 href={'/men-products'}
                 onMouseEnter={() => setHoverMenu('men')}
                 className="cursor-pointer hover:text-blue-600 flex items-center"
               >
-                <p>Men</p> <ChevronDown className='w-5'/>
+                <p>Men</p> <ChevronDown className="w-5" />
               </Link>
               <Link
                 href={'/kids-products'}
                 onMouseEnter={() => setHoverMenu('kids')}
                 className="cursor-pointer hover:text-blue-600 flex items-center"
               >
-                <p>Kids</p> <ChevronDown className='w-5'/>
+                <p>Kids</p> <ChevronDown className="w-5" />
               </Link>
               <Link
                 href={'/flash-sale-products'}
@@ -119,7 +161,6 @@ export default function Navbar({
               {/* HOVER DROPDOWN */}
               {hoverMenu &&
                 (() => {
-                  // Filter category heads for the current menu type
                   const categoryHeads = categories.filter(
                     (cat) =>
                       cat.isCategoryHead &&
@@ -145,7 +186,6 @@ export default function Navbar({
                       onMouseLeave={() => setHoverMenu(null)}
                     >
                       {categoryHeads.map((categoryHead) => {
-                        // Get subcategories for this category head
                         const subCategories = categories.filter(
                           (cat) =>
                             !cat.isCategoryHead &&
@@ -188,7 +228,7 @@ export default function Navbar({
                 className="text-gray-600 hover:text-blue-600"
                 aria-label="Search"
               >
-                <Search className="w-8 h-8" />
+                <Search className="w-7 h-7" />
               </button>
 
               {/* CART */}
@@ -200,13 +240,13 @@ export default function Navbar({
                 <p className="absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0">
                   {cartItems.length}
                 </p>
-                <ShoppingCart className="w-8 h-8" />
+                <ShoppingCart className="w-7 h-7" />
               </button>
 
-              {/* USER DROPDOWN - FIXED: Removed nested button */}
+              {/* USER DROPDOWN */}
               <DropdownMenu>
                 <DropdownMenuTrigger className="text-gray-600 hover:text-blue-600 outline-none">
-                  <User className="w-8 h-8" />
+                  <User className="w-7 h-7" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 p-2 bg-white border rounded-lg shadow-lg">
                   {!isLoggedIn ? (
@@ -230,11 +270,9 @@ export default function Navbar({
                           Admin Dashboard
                         </DropdownMenuItem>
                       )}
-                        <DropdownMenuItem
-                          onClick={() => router.push('/profile')}
-                        >
-                          Profile
-                        </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push('/profile')}>
+                        Profile
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={handleLogout}
                         className="text-red-600"
@@ -249,6 +287,183 @@ export default function Navbar({
           </div>
         </header>
       )}
+
+      {/* MOBILE SIDEBAR OVERLAY */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* MOBILE SIDEBAR */}
+      <div
+        className={`
+          fixed top-0 left-0 h-full w-80 bg-white z-50 shadow-2xl
+          transform transition-transform duration-300 ease-in-out
+          lg:hidden
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          overflow-y-auto
+        `}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-gray-600 hover:text-gray-900"
+            aria-label="Close menu"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Sidebar Content */}
+        <div className="p-4">
+          {/* Men Category */}
+          <div className="mb-2">
+            <div
+              onMouseEnter={() => setExpandedAccordion('men')}
+              onMouseLeave={() => setExpandedAccordion(null)}
+              className="relative"
+            >
+              <Link
+                href="/men-products"
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+              >
+                <span className="font-medium text-gray-700">Men</span>
+                <ChevronRight
+                  className={`w-5 h-5 transition-transform ${
+                    expandedAccordion === 'men' ? 'rotate-90' : ''
+                  }`}
+                />
+              </Link>
+
+              {/* Men Accordion Content */}
+              {expandedAccordion === 'men' && (
+                <div className="ml-4 mt-2 space-y-1 animate-slideDown">
+                  {categories
+                    .filter(
+                      (cat) =>
+                        cat.isCategoryHead &&
+                        cat.categoryHeadId === null &&
+                        cat.categoryType === 'men'
+                    )
+                    .map((categoryHead) => {
+                      const subCategories = categories.filter(
+                        (cat) =>
+                          !cat.isCategoryHead &&
+                          cat.categoryHeadId === categoryHead.id
+                      )
+
+                      return (
+                        <div key={categoryHead.id} className="mb-3">
+                          <h4 className="text-sm font-semibold text-gray-800 mb-2 px-3">
+                            {categoryHead.name}
+                          </h4>
+                          <ul className="space-y-1">
+                            {subCategories.map((subCat) => (
+                              <li key={subCat.id}>
+                                <button
+                                  onClick={() =>
+                                    handleCategoryClick(
+                                      subCat.id!,
+                                      `/category-products/${subCat.id}`
+                                    )
+                                  }
+                                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded"
+                                >
+                                  {subCat.name}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Kids Category */}
+          <div className="mb-2">
+            <div
+              onMouseEnter={() => setExpandedAccordion('kids')}
+              onMouseLeave={() => setExpandedAccordion(null)}
+              className="relative"
+            >
+              <Link
+                href="/kids-products"
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+              >
+                <span className="font-medium text-gray-700">Kids</span>
+                <ChevronRight
+                  className={`w-5 h-5 transition-transform ${
+                    expandedAccordion === 'kids' ? 'rotate-90' : ''
+                  }`}
+                />
+              </Link>
+
+              {/* Kids Accordion Content */}
+              {expandedAccordion === 'kids' && (
+                <div className="ml-4 mt-2 space-y-1 animate-slideDown">
+                  {categories
+                    .filter(
+                      (cat) =>
+                        cat.isCategoryHead &&
+                        cat.categoryHeadId === null &&
+                        cat.categoryType === 'kids'
+                    )
+                    .map((categoryHead) => {
+                      const subCategories = categories.filter(
+                        (cat) =>
+                          !cat.isCategoryHead &&
+                          cat.categoryHeadId === categoryHead.id
+                      )
+
+                      return (
+                        <div key={categoryHead.id} className="mb-3">
+                          <h4 className="text-sm font-semibold text-gray-800 mb-2 px-3">
+                            {categoryHead.name}
+                          </h4>
+                          <ul className="space-y-1">
+                            {subCategories.map((subCat) => (
+                              <li key={subCat.id}>
+                                <button
+                                  onClick={() =>
+                                    handleCategoryClick(
+                                      subCat.id!,
+                                      `/category-products/${subCat.id}`
+                                    )
+                                  }
+                                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded"
+                                >
+                                  {subCat.name}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Flash Sale - No Accordion */}
+          <Link
+            href="/flash-sale-products"
+            onClick={() => setIsSidebarOpen(false)}
+            className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+          >
+            <span className="font-medium text-gray-700">Flash Sale</span>
+          </Link>
+        </div>
+      </div>
 
       {/* FULLSCREEN SEARCH OVERLAY */}
       {showSearchOverlay && (

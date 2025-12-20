@@ -367,7 +367,7 @@ export default function ConfirmedOrders() {
                   <TableCell>
                     {order.orderMaster.transactionId || '-'}
                   </TableCell>
-                  <TableCell>₹{order.orderMaster.totalAmount}</TableCell>
+                  <TableCell>৳{order.orderMaster.totalAmount}</TableCell>
                   <TableCell>
                     {formatDate(order.orderMaster.createdAt)}
                   </TableCell>
