@@ -13,12 +13,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { fetchProducts } from '@/api/product-api'
-import { fetchCategories } from '@/api/categories-api'
+import { fetchProducts } from '@/utils/api'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
 import type { GetCategoryType, GetProductType } from '@/utils/type'
 import { useCart } from '@/hooks/use-cart'
+import { fetchCategories } from '@/utils/api'
 
 interface NavbarProps {
   searchQuery: string

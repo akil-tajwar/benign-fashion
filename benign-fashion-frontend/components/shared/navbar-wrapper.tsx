@@ -47,7 +47,7 @@ export default function NavbarWrapper({
     const filtered = allProducts.filter(
       (product) =>
         product?.product?.name?.toLowerCase().includes(query.toLowerCase()) ||
-        product?.categoryName?.toLowerCase()?.includes(query.toLowerCase())
+        product?.product.categoryName?.toLowerCase()?.includes(query.toLowerCase())
     )
 
     // Update global search context
@@ -64,7 +64,7 @@ export default function NavbarWrapper({
       product?.product?.name
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      product?.categoryName?.toLowerCase()?.includes(searchQuery.toLowerCase())
+      product?.product.categoryName?.toLowerCase()?.includes(searchQuery.toLowerCase())
   )
 
   return (

@@ -14,8 +14,8 @@ import { useRouter } from 'next/navigation'
 import { toast } from '@/hooks/use-toast'
 import CartSidebar from '@/components/shared/cart-sidebar'
 import type { GetProductType } from '@/utils/type'
-import { createOrderApi } from '@/api/orders-api'
 import { CheckoutProvider } from '@/hooks/use-checkout'
+import { createOrder } from '@/utils/api'
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -118,9 +118,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
     try {
       // Prepare order items from cart
-      const orderItems = cartItems.map((item) => ({
+      const orderDetails = cartItems.map((item) => ({
         productId: item.productId,
-        qty: item.quantity,
+        quantity: item.quantity,
+        size: (item.size || 'M') as 'M' | 'L' | 'XL' | 'XXL',
+        amount: item.price * item.quantity,
+        ordersMasterId: 0,
       }))
 
       // Calculate total from localStorage cart
@@ -130,20 +133,29 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       )
 
       // Create order via API
-      const response = await createOrderApi(token, {
-        userId: userData.userId,
-        items: orderItems,
+      const response = await createOrder(token, {
+        orderMaster: {
+          status: 'pending',
+          address: '',
+          method: 'bkash',
+          fullName: '',
+          division: '',
+          district: '',
+          phone: '',
+          totalAmount: totalAmount,
+        },
+        orderDetails: orderDetails,
       })
 
-      if (response?.data) {
+      if (response?.orderMaster) {
         // Clear cart from localStorage
         clearCart()
         setIsCheckoutOpen(false)
 
-        toast({
-          title: 'Order Placed Successfully!',
-          description: `Total Amount: ৳${response.data.totalOrderAmount || totalAmount.toFixed(2)}. You will receive a confirmation call shortly.`,
-        })
+        // toast({
+        //   title: 'Order Placed Successfully!',
+        //   description: `Total Amount: ৳${response.orderMaster.totalOrderAmount || totalAmount.toFixed(2)}. You will receive a confirmation call shortly.`,
+        // })
       } else {
         toast({
           title: 'Order Failed',
@@ -210,7 +222,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      <CartSidebar onCheckoutClick={() => setIsCheckoutOpen(true)} />
+      <CartSidebar />
 
       <CheckoutForm
         isOpen={isCheckoutOpen}

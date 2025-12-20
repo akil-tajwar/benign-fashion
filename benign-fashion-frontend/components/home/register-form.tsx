@@ -22,7 +22,7 @@ import {
   ChevronLeft,
 } from 'lucide-react'
 import { RegisterRequestSchema } from '@/utils/type'
-import { getUsers } from '@/api/users-api'
+import { getUsers } from '@/utils/api'
 import { UserType } from './login-form'
 import { tokenAtom } from '@/utils/user'
 import { toast } from '@/hooks/use-toast'

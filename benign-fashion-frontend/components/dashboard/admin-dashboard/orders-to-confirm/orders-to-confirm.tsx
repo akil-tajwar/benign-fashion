@@ -194,11 +194,11 @@ export default function OrdersToConfirm() {
       setIsConfirming(true)
       const response = await confirmOrder(token, orderToConfirm)
 
-      if (response.error) {
-        console.error('Error confirming order:', response.error)
+      if ((response as any).error) {
+        console.error('Error confirming order:', (response as any).error)
         toast({
           title: 'Error',
-          description: response.error?.message || 'Failed to confirm order',
+          description: (response as any).error?.message || 'Failed to confirm order',
           variant: 'destructive',
         })
       } else {

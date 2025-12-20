@@ -44,7 +44,7 @@ export const userRolesModel = mysqlTable("user_roles", {
 export const userModel = mysqlTable("users", {
   userId: int("user_id").primaryKey().autoincrement(),
   username: varchar("username", { length: 50 }).notNull().unique(),
-  email: varchar("email", { length: 100 }).notNull().unique(),
+  email: varchar("email", { length: 100 }),
   password: varchar("password", { length: 255 }).notNull(),
   active: boolean("active").notNull().default(true),
   roleId: int("role_id").references(() => roleModel.roleId, {

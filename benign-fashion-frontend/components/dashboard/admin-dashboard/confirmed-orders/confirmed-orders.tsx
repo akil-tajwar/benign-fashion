@@ -163,8 +163,8 @@ export default function ConfirmedOrders() {
   }
 
   const handleCompleteOrder = (orderId: number) => {
-    setOrderToConfirm(orderId)
-    setIsConfirmDialogOpen(true)
+    // setOrderToConfirm(orderId)
+    // setIsConfirmDialogOpen(true)
   }
 
   const formatDate = (dateString?: string) => {
@@ -265,7 +265,7 @@ export default function ConfirmedOrders() {
                 </div>
               </TableHead>
               <TableHead
-                onClick={() => handleSort('address')}
+                // onClick={() => handleSort('address')}
                 className="cursor-pointer"
               >
                 <div className="flex items-center gap-1">

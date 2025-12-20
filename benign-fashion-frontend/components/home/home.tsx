@@ -5,8 +5,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import HeroSlider from './hero-slider'
 import ProductCard from '../product/product-card'
-import { fetchProducts } from '@/api/product-api'
-import { fetchCategories } from '@/api/categories-api'
+import { fetchProducts } from '@/utils/api'
 import { useToast } from '@/hooks/use-toast'
 import { useAtom } from 'jotai'
 import { tokenAtom, useInitializeUser } from '@/utils/user'
@@ -15,6 +14,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { useSearch } from '@/hooks/use-search'
 import { useRouter } from 'next/navigation'
 import Loader from '@/utils/loader'
+import { fetchCategories } from '@/utils/api'
 
 export default function Home() {
   useInitializeUser()

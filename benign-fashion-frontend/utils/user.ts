@@ -3,11 +3,11 @@
 import { atom, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users } from './type'
+import { GetUsersType } from './type'
 
 
 // Atom for full user data
-export const userDataAtom = atom<Users | null>(null)
+export const userDataAtom = atom<GetUsersType | null>(null)
 export const tokenAtom = atom<string>('')
 export const isUserLoadingAtom = atom(true)
 

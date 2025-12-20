@@ -58,7 +58,7 @@ export default function Profile() {
     const fetchUserInfo = async () => {
       try {
         setLoading(true)
-        const response = await getUserByUserId(token, userData.userId)
+        const response = await getUserByUserId(token, userData?.userId ?? 0)
         setUserInfo(response.data)
         console.log('🚀 ~ fetchUserInfo ~ response:', response)
 
@@ -72,12 +72,12 @@ export default function Profile() {
           address: response.data?.address || '',
         })
       } catch (error) {
-        console.error('Failed to fetch user info:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to load user information',
-          variant: 'destructive',
-        })
+        // console.error('Failed to fetch user info:', error)
+        // toast({
+        //   title: 'Error',
+        //   description: 'Failed to load user information',
+        //   variant: 'destructive',
+        // })
       } finally {
         setLoading(false)
       }
@@ -95,7 +95,13 @@ export default function Profile() {
         setLoading(true)
         const response = await fetchOrdersByUserId(token, userData?.userId)
         console.log('🚀 ~ fetchOrders ~ userData?.userId:', userData?.userId)
-        setOrders(Array.isArray(response.data) ? response.data : response.data ? [response.data] : [])
+        setOrders(
+          Array.isArray(response.data)
+            ? response.data
+            : response.data
+              ? [response.data]
+              : []
+        )
         console.log('🚀 ~ fetchOrders ~ response.data:', response.data)
       } catch (error) {
         console.error('Failed to fetch orders:', error)
@@ -145,9 +151,26 @@ export default function Profile() {
 
     try {
       setLoading(true)
-      await updateUser(token, userData.userId, editFormData)
 
-      // Refresh user info
+      // Update user
+      const updateResponse = await updateUser(
+        token,
+        userData.userId,
+        editFormData
+      )
+
+      // Check if the update was actually successful
+      if (updateResponse.error) {
+        console.log("🚀 ~ handleSaveChanges ~ updateResponse:", updateResponse)
+        toast({
+          title: 'Error',
+          description: (updateResponse.error?.details as any).message,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      // Refresh user info only if update was successful
       const response = await getUserByUserId(token, userData.userId)
       setUserInfo(response.data)
       setIsEditing(false)
@@ -158,11 +181,6 @@ export default function Profile() {
       })
     } catch (error) {
       console.error('Failed to update profile:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to update profile',
-        variant: 'destructive',
-      })
     } finally {
       setLoading(false)
     }
