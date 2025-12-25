@@ -659,7 +659,7 @@ const Products = () => {
                   </TableCell>
                   <TableCell>{product.product.productCode || '-'}</TableCell>
                   <TableCell>{product.product.name}</TableCell>
-                  <TableCell>₹{product.product.price}</TableCell>
+                  <TableCell>৳{product.product.price}</TableCell>
                   <TableCell>{product.product.discount}%</TableCell>
                   <TableCell>
                     {product.product.isAvailable ? (
@@ -1050,7 +1050,7 @@ const Products = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className='bg-white'>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>

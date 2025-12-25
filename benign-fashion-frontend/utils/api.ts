@@ -117,6 +117,18 @@ export async function updateCategory(
   })
 }
 
+
+export async function deleteCategory(id: number, token: string) {
+  return fetchApi<{ id: number }>({
+    url: `api/categories/delete/${id}`,
+    method: 'DELETE',
+    headers: {
+      Authorization: token,
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
 // Create a new product
 export async function createProduct(token: string, formData: FormData) {
   return fetchApiWithFile<CreateProductType>({

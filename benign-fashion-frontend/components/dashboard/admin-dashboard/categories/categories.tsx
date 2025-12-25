@@ -15,9 +15,14 @@ import {
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DialogFooter } from '@/components/ui/dialog'
-import { Plus, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, ChevronDown, ChevronRight, Edit, Trash2 } from 'lucide-react'
 import type { CreateCategoryType, GetCategoryType } from '@/utils/type'
-import { createCategory, fetchCategories, updateCategory } from '@/utils/api'
+import {
+  createCategory,
+  deleteCategory,
+  fetchCategories,
+  updateCategory,
+} from '@/utils/api'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
@@ -30,6 +35,16 @@ import {
 } from '@/components/ui/select'
 import { Popup } from '@/utils/popup'
 import { CustomCombobox } from '@/utils/custom-combobox'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface GroupedCategory {
   head: GetCategoryType
@@ -62,6 +77,10 @@ const Categories = () => {
 
   const [editingCategory, setEditingCategory] =
     useState<GetCategoryType | null>(null)
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // State for form data
@@ -137,6 +156,27 @@ const Categories = () => {
     setIsPopupOpen(true)
   }, [])
 
+  const handleDeleteClick = (productId: number) => {
+    setCategoryToDelete(productId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!token || !categoryToDelete) return
+
+    try {
+      setIsLoading(true)
+      await deleteCategory(categoryToDelete, token)
+      await fetchCategoriesData() // This will properly refresh the categories
+      setDeleteDialogOpen(false)
+      setCategoryToDelete(null)
+    } catch (error) {
+      console.error('Error deleting category:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const toggleExpanded = (headId: number | undefined) => {
     if (headId === undefined) return
     setExpandedHeads((prev) => {
@@ -148,6 +188,14 @@ const Categories = () => {
       }
       return newSet
     })
+  }
+
+  // Helper function to check if a category head has children
+  const hasChildren = (categoryId: number | undefined): boolean => {
+    if (categoryId === undefined) return false
+    return categories.some(
+      (cat) => cat.categoryHeadId === categoryId && !cat.isCategoryHead
+    )
   }
 
   // Handle form submission
@@ -258,6 +306,7 @@ const Categories = () => {
                   expandedHeads.has(group.head.id)
                 const headSlNo = slNo
                 slNo += 1
+                const headHasChildren = hasChildren(group.head.id)
 
                 return (
                   <React.Fragment key={`group-${group.head.id}`}>
@@ -283,13 +332,30 @@ const Categories = () => {
                           Yes
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(group.head)}
                         >
-                          Edit
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleDeleteClick(group.head.id as number)
+                          }
+                          disabled={headHasChildren}
+                          title={
+                            headHasChildren
+                              ? 'Cannot delete category head with subcategories'
+                              : 'Delete category'
+                          }
+                        >
+                          <Trash2
+                            className={`w-4 h-4 ${headHasChildren ? 'text-gray-400' : 'text-red-600'}`}
+                          />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -316,13 +382,22 @@ const Categories = () => {
                                 No
                               </span>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="space-x-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleEdit(child)}
                               >
-                                Edit
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteClick(child.id as number)
+                                }
+                              >
+                                <Trash2 className="w-4 h-4 text-red-600" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -445,6 +520,30 @@ const Categories = () => {
           </DialogFooter>
         </form>
       </Popup>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              category from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
