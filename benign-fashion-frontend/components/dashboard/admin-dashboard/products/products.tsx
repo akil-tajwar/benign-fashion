@@ -388,28 +388,50 @@ const Products = () => {
 
         const form = new FormData()
 
-        // Add product info as JSON
-        console.log('Product data to send:', formData.product)
-        form.append('product', JSON.stringify(formData.product))
-
-        // Append new image files
-        const newFiles = imageFiles.filter((img) => img.file)
-        newFiles.forEach((img) => {
-          if (img.file) {
-            form.append('photoUrls', img.file)
+        // Build photoUrls array in the correct format
+        const photoUrlsData = imageFiles.map((img, index) => {
+          if (img.isExisting) {
+            // Existing image from database
+            return {
+              id: img.id,
+              url: img.url,
+              // Keep the order based on current position
+            }
+          } else {
+            // New image - will be uploaded
+            return {
+              url: '', // Backend will fill this after upload
+            }
           }
         })
 
-        // If editing, include existing image URLs that should be kept
-        if (editingProduct && editingProduct.product.id !== undefined) {
-          const existingUrls = imageFiles
-            .filter((img) => img.isExisting)
-            .map((img) => ({ id: img.id, url: img.url }))
+        // Create the complete product data structure
+        const productData: CreateProductType = {
+          product: formData.product,
+          photoUrls: photoUrlsData,
+        }
 
-          if (existingUrls.length > 0) {
-            form.append('existingPhotos', JSON.stringify(existingUrls))
+        // Add product data as JSON
+        console.log('Product data to send:', productData)
+        form.append('product', JSON.stringify(productData.product))
+        form.append('photoUrls', JSON.stringify(photoUrlsData))
+
+        // Append new image files (backend should match these with empty url entries)
+        const newFiles = imageFiles.filter((img) => img.file)
+        newFiles.forEach((img) => {
+          if (img.file) {
+            form.append('photoFiles', img.file)
           }
+        })
 
+        // Debug: Check what's in FormData
+        console.log('=== FormData contents ===')
+        for (let pair of form.entries()) {
+          console.log(pair[0], ':', pair[1])
+        }
+        console.log('========================')
+
+        if (editingProduct && editingProduct.product.id !== undefined) {
           await updateProduct(token, editingProduct.product.id, form)
         } else {
           await createProduct(token, form)

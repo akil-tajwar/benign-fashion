@@ -103,19 +103,50 @@ export const getProductByIdController = async (
 
 // ======================== UPDATE ========================
 
-export const updateProductController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const updateProductController = async (req: Request, res: Response) => {
   try {
-    const validated = productSchema.partial().parse(req.body);
+    const productId = Number(req.params.id);
 
-    const updated = await updateProduct(Number(req.params.id), validated);
+    // Check if product field exists
+    if (!req.body.product) {
+      res.status(400).json({
+        error: "Product data is required",
+        receivedFields: Object.keys(req.body),
+        bodyContent: req.body,
+      });
+      return;
+    }
 
-    res.json(updated);
+    // Parse product data
+    const product = JSON.parse(req.body.product);
+
+    // Parse existing photos data (if provided)
+    const existingPhotos = req.body.photoUrls
+      ? JSON.parse(req.body.photoUrls)
+      : [];
+
+    // Get new uploaded files
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    // Extract only existing photos (ones with id and url)
+    const photosToKeep = existingPhotos.filter(
+      (p: any) => p.id && p.url && p.url !== ""
+    );
+
+    const updatedProduct = await updateProduct(productId, {
+      product,
+      photoUrls: files, // New files to upload
+      existingPhotos: photosToKeep, // Existing photos to keep
+    });
+
+    res.json({ success: true, data: updatedProduct });
   } catch (err) {
-    next(err);
+    console.error("Error details:", err);
+    if (err instanceof SyntaxError) {
+      res.status(400).json({ error: "Invalid JSON in product or photoUrls field" });
+      return;
+    }
+    res.status(500).json({ error: "Something went wrong" });
   }
 };
 

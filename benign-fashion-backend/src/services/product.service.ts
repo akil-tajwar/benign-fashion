@@ -1,9 +1,7 @@
 import { db } from "../config/database";
 import { productsModel, photosModel, categoriesModel } from "../schemas";
-import { eq, and, sql, inArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import fs from "fs";
-import path from "path";
 
 // ======================================================
 // CREATE PRODUCT + PHOTOS
@@ -23,6 +21,9 @@ export interface CreateProductWithFiles {
   };
   photoUrls?: Express.Multer.File[]; // multer files
 }
+export type UpdateProductWithFiles = CreateProductWithFiles & {
+  existingPhotos?: { id: number; url: string }[];
+};
 
 export const createProduct = async (data: CreateProductWithFiles) => {
   return await db.transaction(async (tx) => {
@@ -215,41 +216,59 @@ export const getProductById = async (id: number) => {
 // ======================================================
 export const updateProduct = async (
   id: number,
-  data: {
-    product?: any;
-    photoUrls?: { url: string }[];
-  }
+  data: UpdateProductWithFiles
 ) => {
   return await db.transaction(async (tx) => {
     // 1️⃣ Update product fields
-    if (data.product) {
+    await tx
+      .update(productsModel)
+      .set({
+        ...data.product,
+        createdAt: data.product.createdAt
+          ? new Date(data.product.createdAt)
+          : undefined,
+      })
+      .where(eq(productsModel.id, id));
+
+    // 2️⃣ Handle photos
+    const baseUrl = process.env.API_BASE_URL || "http://localhost:4000";
+
+    // Get IDs of existing photos to keep
+    const keepPhotoIds =
+      data.existingPhotos?.map((p) => p.id).filter(Boolean) || [];
+
+    // Delete photos that are NOT in the keep list
+    if (keepPhotoIds.length > 0) {
       await tx
-        .update(productsModel)
-        .set(data.product)
-        .where(eq(productsModel.id, id));
-    }
-
-    // 2️⃣ Replace photos if provided
-    if (Array.isArray(data.photoUrls)) {
-      // delete previous photos
-      await tx.delete(photosModel).where(eq(photosModel.productId, id));
-
-      // insert new photos
-      if (data.photoUrls.length > 0) {
-        await tx.insert(photosModel).values(
-          data.photoUrls.map((p) => ({
-            productId: id,
-            url: p.url,
-          }))
+        .delete(photosModel)
+        .where(
+          and(
+            eq(photosModel.productId, id),
+            notInArray(photosModel.id, keepPhotoIds)
+          )
         );
-      }
+    } else {
+      // If no photos to keep, delete all existing photos
+      await tx.delete(photosModel).where(eq(photosModel.productId, id));
     }
 
-    // 3️⃣ Return updated record
-    return await tx.query.productsModel.findFirst({
+    // Insert new uploaded photos
+    if (data.photoUrls && data.photoUrls.length > 0) {
+      const newPhotosData = data.photoUrls.map((file) => ({
+        productId: id,
+        url: `${baseUrl}/uploads/${file.filename}`,
+      }));
+
+      await tx.insert(photosModel).values(newPhotosData);
+    }
+
+    // 3️⃣ Return updated product with photos
+    const product = await tx.query.productsModel.findFirst({
       where: eq(productsModel.id, id),
       with: { photos: true },
     });
+
+    return product;
   });
 };
 
