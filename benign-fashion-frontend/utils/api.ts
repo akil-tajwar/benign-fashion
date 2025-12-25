@@ -157,6 +157,18 @@ export async function updateProduct(
   })
 }
 
+//delete product api
+export async function deleteProduct(token: string, id: number) {
+  return fetchApi<{id: number}>({
+    url: `api/products/delete/${id}`,
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `${token}`,
+    },
+  })
+}
+
 //get product by id api
 export async function fetchProductById(token: string, id: number) {
   return fetchApi<GetProductType>({

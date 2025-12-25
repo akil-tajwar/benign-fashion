@@ -15,7 +15,15 @@ import {
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DialogFooter } from '@/components/ui/dialog'
-import { Plus, Trash2, ArrowUpDown, Search } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  ArrowUpDown,
+  Search,
+  Edit,
+  GripVertical,
+  X,
+} from 'lucide-react'
 import {
   Pagination,
   PaginationContent,
@@ -34,6 +42,7 @@ import {
   fetchCategories,
   fetchProducts,
   updateProduct,
+  deleteProduct,
 } from '@/utils/api'
 import { tokenAtom, useInitializeUser, userDataAtom } from '@/utils/user'
 import { useAtom } from 'jotai'
@@ -41,9 +50,26 @@ import { useRouter } from 'next/navigation'
 import { Popup } from '@/utils/popup'
 import { CustomCombobox } from '@/utils/custom-combobox'
 import Image from 'next/image'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 type SortColumn = 'productCode' | 'name' | 'price' | 'discount' | 'isAvailable'
 type SortDirection = 'asc' | 'desc'
+
+interface ImageFile {
+  id?: number
+  file?: File
+  url: string
+  isExisting: boolean
+}
 
 const Products = () => {
   useInitializeUser()
@@ -63,6 +89,10 @@ const Products = () => {
     null
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<number | null>(null)
 
   // Sorting, searching, and pagination state
   const [sortColumn, setSortColumn] = useState<SortColumn>('name')
@@ -88,7 +118,8 @@ const Products = () => {
     photoUrls: [{ url: '' }],
   })
 
-  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [imageFiles, setImageFiles] = useState<ImageFile[]>([])
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
 
   // State for table data
   const [products, setProducts] = useState<GetProductType[]>([])
@@ -207,19 +238,58 @@ const Products = () => {
     }
   }
 
-  const handlePhotoFileChange = (index: number, files: FileList | null) => {
-    if (!files) return
-    const newPhotoFiles = [...photoFiles]
-    newPhotoFiles[index] = files[0]
-    setPhotoFiles(newPhotoFiles)
+  // Handle multiple file selection
+  const handleMultipleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+
+    const files = Array.from(e.target.files)
+    const newImageFiles: ImageFile[] = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+      isExisting: false,
+    }))
+
+    setImageFiles((prev) => [...prev, ...newImageFiles])
   }
 
-  const handleAddPhotoField = () => {
-    setPhotoFiles([...photoFiles, new File([], '')])
+  // Remove image
+  const handleRemoveImage = (index: number) => {
+    setImageFiles((prev) => {
+      const newFiles = [...prev]
+      // Revoke object URL to prevent memory leaks
+      if (
+        !newFiles[index].isExisting &&
+        newFiles[index].url.startsWith('blob:')
+      ) {
+        URL.revokeObjectURL(newFiles[index].url)
+      }
+      newFiles.splice(index, 1)
+      return newFiles
+    })
   }
 
-  const handleRemovePhotoField = (index: number) => {
-    setPhotoFiles(photoFiles.filter((_, i) => i !== index))
+  // Drag and drop handlers
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index)
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+
+    if (draggedIndex === null || draggedIndex === index) return
+
+    const newImages = [...imageFiles]
+    const draggedImage = newImages[draggedIndex]
+
+    newImages.splice(draggedIndex, 1)
+    newImages.splice(index, 0, draggedImage)
+
+    setImageFiles(newImages)
+    setDraggedIndex(index)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
   }
 
   const resetForm = useCallback(() => {
@@ -238,10 +308,18 @@ const Products = () => {
       },
       photoUrls: [{ url: '' }],
     })
-    setPhotoFiles([new File([], '')])
+
+    // Clean up object URLs
+    imageFiles.forEach((img) => {
+      if (!img.isExisting && img.url.startsWith('blob:')) {
+        URL.revokeObjectURL(img.url)
+      }
+    })
+
+    setImageFiles([])
     setEditingProduct(null)
     setIsPopupOpen(false)
-  }, [])
+  }, [imageFiles])
 
   const handleEdit = useCallback((product: GetProductType) => {
     setEditingProduct(product)
@@ -262,12 +340,43 @@ const Products = () => {
       photoUrls:
         product.photoUrls.length > 0 ? product.photoUrls : [{ url: '' }],
     })
-    setPhotoFiles([new File([], '')])
+
+    // Load existing images
+    const existingImages: ImageFile[] = product.photoUrls
+      .filter((photo) => photo.url)
+      .map((photo) => ({
+        id: photo.id,
+        url: photo.url,
+        isExisting: true,
+      }))
+
+    setImageFiles(existingImages)
     setIsPopupOpen(true)
   }, [])
 
+  // Handle delete
+  const handleDeleteClick = (productId: number) => {
+    setProductToDelete(productId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!token || !productToDelete) return
+
+    try {
+      setIsLoading(true)
+      await deleteProduct(token, productToDelete)
+      await fetchProductsData()
+      setDeleteDialogOpen(false)
+      setProductToDelete(null)
+    } catch (error) {
+      console.error('Error deleting product:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Handle form submission
-  // In handleSubmit, ensure at least the product field is always sent
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
@@ -283,30 +392,30 @@ const Products = () => {
         console.log('Product data to send:', formData.product)
         form.append('product', JSON.stringify(formData.product))
 
-        // Append all selected photo files
-        const validFiles = photoFiles.filter((file) => file && file.size > 0)
+        // Append new image files
+        const newFiles = imageFiles.filter((img) => img.file)
+        newFiles.forEach((img) => {
+          if (img.file) {
+            form.append('photoUrls', img.file)
+          }
+        })
 
-        if (validFiles.length > 0) {
-          validFiles.forEach((file) => {
-            form.append('photoUrls', file)
-          })
-        }
-
-        // Debug: Check what's in FormData
-        console.log('=== FormData contents ===')
-        for (let pair of form.entries()) {
-          console.log(pair[0], ':', pair[1])
-        }
-        console.log('========================')
-
+        // If editing, include existing image URLs that should be kept
         if (editingProduct && editingProduct.product.id !== undefined) {
+          const existingUrls = imageFiles
+            .filter((img) => img.isExisting)
+            .map((img) => ({ id: img.id, url: img.url }))
+
+          if (existingUrls.length > 0) {
+            form.append('existingPhotos', JSON.stringify(existingUrls))
+          }
+
           await updateProduct(token, editingProduct.product.id, form)
         } else {
-          const result = await createProduct(token, form)
-          console.log('Create result:', result)
+          await createProduct(token, form)
         }
 
-        fetchProductsData()
+        await fetchProductsData()
         resetForm()
       } catch (error) {
         console.error('Error saving product:', error)
@@ -314,7 +423,7 @@ const Products = () => {
         setIsSubmitting(false)
       }
     },
-    [formData, token, fetchProductsData, resetForm, editingProduct, photoFiles]
+    [formData, token, fetchProductsData, resetForm, editingProduct, imageFiles]
   )
 
   // Filtering products based on search term
@@ -389,14 +498,6 @@ const Products = () => {
     }
   }
 
-  // Get selected category and subcategory objects for combobox display
-  const selectedCategory = formData.product.categoryId
-    ? categories.find((c) => c.id === formData.product.categoryId)
-    : null
-  const selectedSubCategory = formData.product.subCategoryId
-    ? subCategories.find((s) => s.id === formData.product.subCategoryId)
-    : null
-
   return (
     <div className="p-6 space-y-6">
       {/* Header with title and add button */}
@@ -436,7 +537,7 @@ const Products = () => {
                 },
                 photoUrls: [{ url: '' }],
               })
-              setPhotoFiles([]) // ← Changed: empty array instead of [new File([], '')]
+              setImageFiles([])
               setIsPopupOpen(true)
             }}
           >
@@ -549,13 +650,22 @@ const Products = () => {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(product)}
                     >
-                      Edit
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteClick(product.product.id as number)
+                      }
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -612,7 +722,7 @@ const Products = () => {
       >
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-96 overflow-y-auto"
+          className="space-y-4 max-h-[70vh] overflow-y-auto"
         >
           {/* Basic Product Info */}
           <div className="grid grid-cols-2 gap-4">
@@ -819,66 +929,86 @@ const Products = () => {
             </div>
           </div>
 
+          {/* Image Upload Section */}
           <div className="space-y-3 border-t pt-4">
             <Label className="text-base font-semibold">Product Photos</Label>
-            {photoFiles.length === 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="photoFile-0" className="text-sm">
-                  Photo 1
-                </Label>
-                <Input
-                  id="photoFile-0"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      setPhotoFiles([e.target.files[0]])
-                    }
-                  }}
-                  className="text-sm"
-                />
+
+            {/* File Input for Multiple Selection */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="product-images"
+                className="cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:bg-blue-50 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Select Images (Multiple)
+              </Label>
+              <Input
+                id="product-images"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleMultipleFileSelect}
+                className="hidden"
+              />
+              <p className="text-xs text-gray-500">
+                You can select multiple images at once. Drag to reorder.
+              </p>
+            </div>
+
+            {/* Image Preview Grid with Drag and Drop */}
+            {imageFiles.length > 0 && (
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {imageFiles.map((image, index) => (
+                  <div
+                    key={`${image.url}-${index}`}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragEnd={handleDragEnd}
+                    className={`relative group border-2 rounded-lg overflow-hidden cursor-move transition-all ${
+                      draggedIndex === index
+                        ? 'border-blue-400 opacity-50'
+                        : 'border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="aspect-square relative">
+                      <Image
+                        src={image.url}
+                        alt={`Product image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+
+                      {/* Order Badge */}
+                      <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                        {index + 1}
+                      </div>
+
+                      {/* Drag Handle */}
+                      <div className="absolute top-2 right-2 bg-white/80 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GripVertical className="w-4 h-4 text-gray-600" />
+                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute bottom-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      {/* Existing Image Badge */}
+                      {image.isExisting && (
+                        <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                          Existing
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-            {photoFiles.length > 0 &&
-              photoFiles.map((photo, index) => (
-                <div key={index} className="flex gap-2 items-end">
-                  <div className="flex-1 space-y-1">
-                    <Label htmlFor={`photoFile-${index}`} className="text-sm">
-                      Photo {index + 1}
-                    </Label>
-                    <Input
-                      id={`photoFile-${index}`}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        handlePhotoFileChange(index, e.target.files)
-                      }
-                      className="text-sm"
-                    />
-                  </div>
-                  {photoFiles.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemovePhotoField(index)}
-                      className="text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddPhotoField}
-              className="w-full bg-transparent"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add More Photo
-            </Button>
           </div>
 
           <DialogFooter>
@@ -895,6 +1025,30 @@ const Products = () => {
           </DialogFooter>
         </form>
       </Popup>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              product from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setProductToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

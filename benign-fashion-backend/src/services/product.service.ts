@@ -257,6 +257,13 @@ export const updateProduct = async (
 // DELETE PRODUCT
 // ======================================================
 export const deleteProduct = async (id: number) => {
-  await db.delete(productsModel).where(eq(productsModel.id, id));
+  await db.transaction(async (trx) => {
+    // First delete photos related to the product
+    await trx.delete(photosModel).where(eq(photosModel.productId, id));
+    
+    // Then delete the product itself
+    await trx.delete(productsModel).where(eq(productsModel.id, id));
+  });
+  
   return { message: "Product deleted successfully" };
 };
