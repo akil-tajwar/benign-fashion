@@ -19,10 +19,6 @@ export default function CategoryProductsDisplay({
 }: CategoryProductsDisplayProps) {
   const [selectedProduct, setSelectedProduct] = useState<GetProductType | null>(null)
 
-  const handleProductClick = (product: GetProductType) => {
-    setSelectedProduct(product)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -98,7 +94,6 @@ export default function CategoryProductsDisplay({
               <ProductCard
                 key={product.product.id}
                 product={product}
-                onProductClick={handleProductClick}
               />
             ))}
           </div>

@@ -122,7 +122,6 @@ export default function Home() {
               <ProductCard
                 key={product.product.id}
                 product={product}
-                onProductClick={openProductModal}
               />
             ))}
           </div>
@@ -165,7 +164,6 @@ export default function Home() {
                     <ProductCard
                       key={product.product.id}
                       product={product}
-                      onProductClick={openProductModal}
                     />
                   ))}
               </div>
@@ -205,7 +203,6 @@ export default function Home() {
                     <ProductCard
                       key={product.product.id}
                       product={product}
-                      onProductClick={openProductModal}
                     />
                   ))}
               </div>

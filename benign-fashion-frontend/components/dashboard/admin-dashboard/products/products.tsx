@@ -60,6 +60,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import Link from 'next/link'
 
 type SortColumn = 'productCode' | 'name' | 'price' | 'discount' | 'isAvailable'
 type SortDirection = 'asc' | 'desc'
@@ -643,22 +644,24 @@ const Products = () => {
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </TableCell>
                   <TableCell>
-                    {product.photoUrls && product.photoUrls.length > 0 ? (
-                      <Image
-                        src={product.photoUrls[0].url || '/placeholder.svg'}
-                        alt={product.product.name}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-                        No image
-                      </div>
-                    )}
+                    <Link href={`/product-details/${product.product.id}`}>
+                      {product.photoUrls && product.photoUrls.length > 0 ? (
+                        <Image
+                          src={product.photoUrls[0].url || '/placeholder.svg'}
+                          alt={product.product.name}
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                          No image
+                        </div>
+                      )}
+                    </Link>
                   </TableCell>
                   <TableCell>{product.product.productCode || '-'}</TableCell>
-                  <TableCell>{product.product.name}</TableCell>
+                  <TableCell><Link href={`/product-details/${product.product.id}`} className='text-blue-800 font-semibold'>{product.product.name}</Link></TableCell>
                   <TableCell>৳{product.product.price}</TableCell>
                   <TableCell>{product.product.discount}%</TableCell>
                   <TableCell>
@@ -1050,7 +1053,7 @@ const Products = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className='bg-white'>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 import { CustomCombobox } from '@/utils/custom-combobox'
 import { useCart } from '@/hooks/use-cart'
 import { locationData } from '@/utils/constants'
@@ -76,7 +76,11 @@ export default function CheckoutPage() {
         }
       } catch (error) {
         console.error('Failed to fetch user info:', error)
-        toast.error('Failed to load user information')
+        toast({
+          title: 'Error',
+          variant: 'destructive',
+          description: `Failed to load user information`,
+        })
       } finally {
         setUserInfoLoading(false)
       }
@@ -131,6 +135,8 @@ export default function CheckoutPage() {
     if (!formData.address.trim()) newErrors.address = 'Address is required'
     if (!formData.division) newErrors.division = 'Division is required'
     if (!formData.district) newErrors.district = 'District is required'
+    if (!formData.billingPhone)
+      newErrors.billingPhone = 'Billing phone number is required'
     if (!formData.transactionId.trim())
       newErrors.transactionId = 'Transaction ID is required'
 
@@ -151,12 +157,20 @@ export default function CheckoutPage() {
     e.preventDefault()
 
     if (cartItems.length === 0) {
-      toast.error('Your cart is empty')
+      toast({
+        title: 'Error',
+        variant: 'destructive',
+        description: `Your cart is empty. Please add items to cart before placing an order.`,
+      })
       return
     }
 
     if (!validateForm()) {
-      toast.error('Please fill in all required fields')
+      toast({
+        title: 'Error',
+        variant: 'destructive',
+        description: `Please fill in all required fields`,
+      })
       return
     }
 
@@ -198,7 +212,11 @@ export default function CheckoutPage() {
       clearCart()
     } catch (error) {
       console.error('Order error:', error)
-      toast.error('Failed to place order. Please try again.')
+      toast({
+        title: 'Error',
+        variant: 'destructive',
+        description: `Failed to place order. Please try again.`,
+      })
     } finally {
       setIsLoading(false)
     }
@@ -444,7 +462,28 @@ export default function CheckoutPage() {
                   </h3>
                   <ol className="text-xs text-gray-700 space-y-1 list-decimal list-inside">
                     <li>Select your payment method below</li>
-                    <li>Scan the QR code or use the number</li>
+                    <li>
+                      <span className="">
+                        <span>Scan the QR code or use the number: </span>
+                        <span className="font-medium">
+                          {formData.method === 'bkash' && (
+                            <span className="text-pink-500 font-semibold">
+                              01703133275
+                            </span>
+                          )}
+                          {formData.method === 'nagad' && (
+                            <span className="text-orange-500 font-semibold">
+                              01703133275
+                            </span>
+                          )}
+                          {formData.method === 'rocket' && (
+                            <span className="text-purple-500 font-semibold">
+                              01560002262
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                    </li>
                     <li>Pay at least 100 tk to confirm your order</li>
                     <li>Enter the Transaction ID</li>
                   </ol>
@@ -452,7 +491,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg w-full sm:w-40 h-40 bg-gray-100 flex-shrink-0">
                   {formData.method === 'bkash' && (
                     <Image
-                      src="/bkashQR.jpg"
+                      src="/QRbkash.jpeg"
                       alt="bKash QR Code"
                       width={128}
                       height={128}
@@ -460,17 +499,18 @@ export default function CheckoutPage() {
                     />
                   )}
                   {formData.method === 'nagad' && (
-                    <Image
-                      src="/nagadQR.jpg"
-                      alt="Nagad QR Code"
-                      width={128}
-                      height={128}
-                      className="w-32 h-32 object-contain rounded-lg"
-                    />
+                    // <Image
+                    //   src="/nagadQR.jpg"
+                    //   alt="Nagad QR Code"
+                    //   width={128}
+                    //   height={128}
+                    //   className="w-32 h-32 object-contain rounded-lg"
+                    // />
+                    <h1>01703133275</h1>
                   )}
                   {formData.method === 'rocket' && (
                     <Image
-                      src="/rocketQR.jpg"
+                      src="/QRrocket.jpeg"
                       alt="Rocket QR Code"
                       width={128}
                       height={128}

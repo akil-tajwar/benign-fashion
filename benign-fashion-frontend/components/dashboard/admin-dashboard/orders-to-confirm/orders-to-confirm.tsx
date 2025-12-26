@@ -47,6 +47,8 @@ type SortColumn =
   | 'method'
   | 'createdAt'
   | 'status'
+  | 'transactionId'
+  | 'address'
 type SortDirection = 'asc' | 'desc'
 
 export default function OrdersToConfirm() {
@@ -301,10 +303,8 @@ export default function OrdersToConfirm() {
                 onClick={() => handleSort('fullName')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
                   <span>Customer Name</span>
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('phone')}
@@ -337,26 +337,36 @@ export default function OrdersToConfirm() {
                 onClick={() => handleSort('method')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
-                  <span>Payment Method</span>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </div>
+                Payment Method
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('transactionId')}
+                className="cursor-pointer"
+              >
+                Transaction ID
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
               </TableHead>
               <TableHead
                 onClick={() => handleSort('totalAmount')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
-                  <span>Total Amount</span>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </div>
+                Total Amount
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
               </TableHead>
               <TableHead
                 onClick={() => handleSort('createdAt')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
                   <span>Order Date</span>
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+              </TableHead>
+              <TableHead
+                onClick={() => handleSort('address')}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Address</span>
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </TableHead>
@@ -398,18 +408,23 @@ export default function OrdersToConfirm() {
                   <TableCell className="uppercase">
                     {order.orderMaster.method}
                   </TableCell>
+                  <TableCell>
+                    {order.orderMaster.transactionId || '-'}
+                  </TableCell>
                   <TableCell>৳{order.orderMaster.totalAmount}</TableCell>
                   <TableCell>
                     {formatDate(order.orderMaster.createdAt)}
                   </TableCell>
+                  <TableCell className="">
+                    {order.orderMaster.address}
+                  </TableCell>
                   <TableCell className="text-sm">
                     <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${order.orderMaster.status === 'pending'? 'bg-yellow-100 text-yellow-800': order.orderMaster.status === 'confirmed'? 'bg-blue-100 text-blue-800': order.orderMaster.status === 'delivered'? 'bg-green-100 text-green-800': 'bg-gray-100 text-gray-800'}`}
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize ${order.orderMaster.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : order.orderMaster.status === 'confirmed' ? 'bg-blue-100 text-blue-800' : order.orderMaster.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
                     >
                       {order.orderMaster.status}
                     </span>
                   </TableCell>
-
                   <TableCell>
                     <div className="flex gap-2">
                       <Button

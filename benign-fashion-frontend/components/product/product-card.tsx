@@ -10,14 +10,14 @@ import { useToast } from '@/hooks/use-toast'
 
 interface ProductCardProps {
   product: GetProductType
-  onProductClick: (product: GetProductType) => void
+  // onProductClick: (product: GetProductType) => void
 }
 
 const ALL_SIZES = ['M', 'L', 'XL', 'XXL']
 
 export default function ProductCard({
   product,
-  onProductClick,
+  // onProductClick,
 }: ProductCardProps) {
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isButtonHovered, setIsButtonHovered] = useState(false)
@@ -29,9 +29,9 @@ export default function ProductCard({
   const firstImage =
     product.photoUrls?.[0]?.url || '/diverse-products-still-life.png'
 
-  const handleProductClick = () => {
-    onProductClick(product)
-  }
+  // const handleProductClick = () => {
+  //   onProductClick(product)
+  // }
 
   const handleSizeSelect = (e: React.MouseEvent, size: string) => {
     e.stopPropagation()
@@ -58,7 +58,7 @@ export default function ProductCard({
       <Link
         href={`/product-details/${product.product.id}`}
         className="aspect-square relative overflow-hidden bg-gray-100"
-        onClick={handleProductClick}
+        // onClick={handleProductClick}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
       >
@@ -80,10 +80,13 @@ export default function ProductCard({
 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-1">
-        <div onClick={handleProductClick} className="cursor-pointer">
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base">
+        <div className="cursor-pointer">
+          <Link
+            href={`/product-details/${product.product.id}`}
+            className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm md:text-base"
+          >
             {product.product.name}
-          </h3>
+          </Link>
 
           <p className="text-xs text-gray-500 mb-3 line-clamp-1">
             {product.product.subCategoryName}
@@ -136,35 +139,36 @@ export default function ProductCard({
     hover:from-blue-700 hover:to-indigo-700
     disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-700
     transition-all duration-500 ease-in-out
-    ${isButtonHovered ? '-translate-y-full' : 'translate-y-0'}
+    ${(isButtonHovered && product.product.isAvailable) ? '-translate-y-full' : 'translate-y-0'}
   `}
           >
             <span className="block">Add to Cart</span>
           </Button>
 
           {/* === SIZE BUTTONS VIEW === */}
-          <div
-            className={`
+          {product.product.isAvailable && (
+            <div
+              className={`
       absolute inset-0 bg-blue-600 rounded-md flex items-center justify-center gap-1 px-2
       font-semibold
     bg-gradient-to-r from-blue-600 to-indigo-600
     hover:from-blue-700 hover:to-indigo-700
     disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-700
     transition-all duration-500 ease-in-out
-      ${isButtonHovered ? 'translate-y-0' : 'translate-y-full'}
+      ${(isButtonHovered && product.product.isAvailable) ? 'translate-y-0' : 'translate-y-full'}
     `}
-          >
-            {ALL_SIZES.map((size) => {
-              const isAvailable = product.product?.availableSize?.includes(
-                size as 'M' | 'L' | 'XL' | 'XXL'
-              )
+            >
+              {ALL_SIZES.map((size) => {
+                const isAvailable = product.product?.availableSize?.includes(
+                  size as 'M' | 'L' | 'XL' | 'XXL'
+                )
 
-              return (
-                <button
-                  key={size}
-                  disabled={!isAvailable}
-                  onClick={(e) => isAvailable && handleSizeSelect(e, size)}
-                  className={`
+                return (
+                  <button
+                    key={size}
+                    disabled={!isAvailable}
+                    onClick={(e) => isAvailable && handleSizeSelect(e, size)}
+                    className={`
             px-2 py-1 text-xs font-semibold rounded transition-all duration-200 
             ${
               isAvailable
@@ -174,12 +178,13 @@ export default function ProductCard({
                 : 'bg-gray-300 text-gray-900 line-through cursor-not-allowed opacity-60'
             }
           `}
-                >
-                  {size}
-                </button>
-              )
-            })}
-          </div>
+                  >
+                    {size}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

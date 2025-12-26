@@ -13,6 +13,7 @@ import Image from 'next/image'
 import size from '../../../public/size.jpeg'
 import { useCart } from '@/hooks/use-cart'
 import { Button } from '@/components/ui/button'
+import ProductCard from '../product-card'
 
 export default function ProductDetails() {
   useInitializeUser()
@@ -224,17 +225,17 @@ export default function ProductDetails() {
               <div className="flex items-center gap-3">
                 {product.product.discount > 0 && (
                   <span className="text-lg text-muted-foreground line-through">
-                    ৳ {product.product.price.toFixed(2)}
+                    ৳{Math.round(product.product.price)}
                   </span>
                 )}
                 <span className="text-3xl font-bold text-blue-600">
-                  ৳ {discountedPrice.toFixed(2)}
+                  ৳{Math.round(discountedPrice)}
                 </span>
               </div>
               {product.product.discount > 0 && (
                 <p className="text-sm text-green-600 font-medium">
                   You Save ৳
-                  {(product.product.price - discountedPrice).toFixed(2)} (
+                  {Math.round(product.product.price - discountedPrice)} (
                   {product.product.discount}%)
                 </p>
               )}
@@ -250,25 +251,29 @@ export default function ProductDetails() {
               </label>
               <div className="flex gap-2 flex-wrap">
                 {ALL_SIZES.map((size) => {
-                  const isAvailable = product.product?.availableSize?.includes(
-                    size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
-                  )
+                  const isSizeAvailable =
+                    product.product?.availableSize?.includes(
+                      size as 'S' | 'M' | 'L' | 'XL' | 'XXL'
+                    )
+
+                  const isDisabled =
+                    !product.product.isAvailable || !isSizeAvailable
 
                   return (
                     <button
                       key={size}
-                      disabled={!isAvailable}
-                      onClick={() => isAvailable && setSelectedSize(size)}
+                      disabled={isDisabled}
+                      onClick={() => !isDisabled && setSelectedSize(size)}
                       className={`
-          px-5 py-2 border-2 rounded font-medium transition-all duration-200
-          ${
-            isAvailable
-              ? selectedSize === size
-                ? 'border-blue-600 bg-blue-600 text-white scale-105'
-                : 'border-gray-300 text-foreground hover:border-blue-400 hover:bg-blue-50'
-              : 'border-gray-300 text-gray-400 line-through cursor-not-allowed opacity-60'
-          }
-        `}
+        px-5 py-2 border-2 rounded font-medium transition-all duration-200
+        ${
+          isDisabled
+            ? 'border-gray-300 text-gray-400 line-through cursor-not-allowed opacity-60'
+            : selectedSize === size
+              ? 'border-blue-600 bg-blue-600 text-white scale-105'
+              : 'border-gray-300 text-foreground hover:border-blue-400 hover:bg-blue-50'
+        }
+      `}
                     >
                       {size}
                     </button>
@@ -302,9 +307,9 @@ export default function ProductDetails() {
                   variant={'default'}
                   className="flex-1 bg-blue-600 text-white py-6 text-lg rounded hover:bg-blue-700 transition-colors font-semibold"
                   onClick={handleAddToCart}
-                  disabled={!selectedSize}
+                  disabled={!selectedSize || !product.product.isAvailable}
                 >
-                  ADD TO CART
+                   {product.product.isAvailable? 'ADD TO CART' : 'Out of Stock'}
                 </Button>
               </div>
 
@@ -372,50 +377,10 @@ export default function ProductDetails() {
                 const mainImage = relatedProduct.photoUrls?.[0]?.url
 
                 return (
-                  <Link
+                  <ProductCard
                     key={relatedProduct.product.id}
-                    href={`/product-details/${relatedProduct.product.id}`}
-                  >
-                    <div className="space-y-3 cursor-pointer group">
-                      <div className="relative bg-muted rounded overflow-hidden aspect-square">
-                        {relatedProduct.product.discount > 0 && (
-                          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold z-10">
-                            -{relatedProduct.product.discount}%
-                          </div>
-                        )}
-                        {mainImage ? (
-                          <Image
-                            src={mainImage || '/placeholder.svg'}
-                            alt={relatedProduct.product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            width={1280}
-                            height={1280}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted">
-                            <span className="text-xs text-muted-foreground">
-                              No image
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium line-clamp-2">
-                          {relatedProduct.product.name}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          {relatedProduct.product.discount > 0 && (
-                            <span className="text-xs text-muted-foreground line-through">
-                              ৳ {relatedProduct.product.price.toFixed(2)}
-                            </span>
-                          )}
-                          <span className="text-sm font-bold">
-                            ৳ {relatedDiscountedPrice.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                    product={relatedProduct}
+                  />
                 )
               })}
             </div>

@@ -48,6 +48,7 @@ type SortColumn =
   | 'createdAt'
   | 'address'
   | 'status'
+  | 'transactionId'
 type SortDirection = 'asc' | 'desc'
 
 export default function ConfirmedOrders() {
@@ -293,20 +294,22 @@ export default function ConfirmedOrders() {
                 onClick={() => handleSort('method')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
-                  <span>Payment Method</span>
+                  Payment Method
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </div>
               </TableHead>
-              <TableHead>Transaction ID</TableHead>
+              <TableHead
+                onClick={() => handleSort('transactionId')}
+                className="cursor-pointer"
+              >
+                Transaction ID
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+              </TableHead>
               <TableHead
                 onClick={() => handleSort('totalAmount')}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-1">
-                  <span>Total Amount</span>
+                Total Amount
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                </div>
               </TableHead>
               <TableHead
                 onClick={() => handleSort('createdAt')}
@@ -371,7 +374,7 @@ export default function ConfirmedOrders() {
                   <TableCell>
                     {formatDate(order.orderMaster.createdAt)}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">
+                  <TableCell className="">
                     {order.orderMaster.address}
                   </TableCell>
                   <TableCell className="text-sm">
