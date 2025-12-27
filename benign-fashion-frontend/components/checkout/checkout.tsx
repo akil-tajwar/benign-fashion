@@ -232,7 +232,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="w-4/5 mx-auto">
+      <div className="lg:w-4/5 mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p className="text-gray-600">Complete your purchase</p>
@@ -464,7 +464,7 @@ export default function CheckoutPage() {
                     <li>Select your payment method below</li>
                     <li>
                       <span className="">
-                        <span>Scan the QR code or use the number: </span>
+                        <span>Scan the QR code or use the number (personal): </span>
                         <span className="font-medium">
                           {formData.method === 'bkash' && (
                             <span className="text-pink-500 font-semibold">

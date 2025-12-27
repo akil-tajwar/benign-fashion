@@ -221,7 +221,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="w-4/5 mx-auto">
+      <div className="lg:w-4/5 mx-auto">
         {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Profile Header Section - Now on the left */}
@@ -235,7 +235,7 @@ export default function Profile() {
                 <div className="flex flex-col items-center -mt-16">
                   {/* Avatar */}
                   <div className="relative group mb-4">
-                    <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-5xl font-bold shadow-2xl ring-4 ring-white transform transition-transform group-hover:scale-105">
+                    <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-7xl font-bold shadow-2xl ring-4 ring-white transform transition-transform group-hover:scale-105">
                       {getInitial()}
                     </div>
                     <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">

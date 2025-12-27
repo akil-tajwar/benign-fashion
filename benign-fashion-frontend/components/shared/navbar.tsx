@@ -1,4 +1,3 @@
-// Fully Responsive Navbar with Hamburger Menu + Sliding Sidebar
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -24,7 +23,7 @@ import {
 import { fetchProducts } from '@/utils/api'
 import { useAtom } from 'jotai'
 import { tokenAtom } from '@/utils/user'
-import type { GetCategoryType, GetProductType } from '@/utils/type'
+import type { GetCategoryType } from '@/utils/type'
 import { useCart } from '@/hooks/use-cart'
 import { fetchCategories } from '@/utils/api'
 
@@ -54,10 +53,8 @@ export default function Navbar({
   setIsRegisterOpen,
   handleLogout,
   setIsCartOpen,
-  getTotalItems,
   roleId,
   onCategoryClick,
-  onProductClick,
 }: NavbarProps) {
   const [categories, setCategories] = useState<GetCategoryType[]>([])
   const [token] = useAtom(tokenAtom)
@@ -111,7 +108,7 @@ export default function Navbar({
       {/* NAVBAR */}
       {!showSearchOverlay && (
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-          <div className="max-w-11/12 mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="max-w-11/12 mx-auto px-4 py-2 flex items-center justify-between">
             {/* LEFT SECTION - Hamburger + Logo */}
             <div className="flex items-center gap-3">
               {/* HAMBURGER MENU - Visible only on mobile/tablet */}
@@ -130,7 +127,7 @@ export default function Navbar({
                   alt="Logo"
                   width={50}
                   height={50}
-                  className="object-contain rounded-full"
+                  className="object-contain"
                 />
               </Link>
             </div>

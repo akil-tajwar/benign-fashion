@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import NavbarWrapper from '@/components/shared/navbar-wrapper'
 import SignIn, { UserType } from '@/components/home/login-form'
 import RegisterForm from '@/components/home/register-form'
-import CheckoutForm from '@/components/home/checkout-form'
 import { useAtom } from 'jotai'
 import { tokenAtom, userDataAtom } from '@/utils/user'
 import { SearchProvider } from '@/hooks/use-search'
@@ -223,13 +222,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       />
 
       <CartSidebar />
-
-      <CheckoutForm
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        cartTotal={0} // Will be calculated from cart context
-        onOrderComplete={handleOrderComplete}
-      />
 
       {children}
     </>

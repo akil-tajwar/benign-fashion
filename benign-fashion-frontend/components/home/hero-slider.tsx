@@ -7,35 +7,35 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 const sliderImages = [
   {
     id: 1,
-    src: '/men1.webp',
-    alt: 'Very New Cloths',
-    title: 'Authentic & Pure',
+    src: '/men1.jpg',
+    alt: "Elegant Men's Formal Shirt",
+    title: 'Premium Cotton Collection',
     subtitle:
-      ' Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, et?',
+      'Discover our tailored formal shirts, crafted from breathable premium cotton for all-day comfort and a sharp, professional look.',
   },
   {
     id: 2,
     src: '/men2.jpg',
-    alt: 'Organic Spices & Herbs',
-    title: 'Random Title',
+    alt: "Men's Embroidered Panjabi",
+    title: 'Traditional Elegance',
     subtitle:
-      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad officiis molestias culpa, illo harum illum doloremque.',
+      'Embrace heritage with our hand-embroidered panjabis, featuring intricate designs and luxurious fabrics perfect for festive occasions.',
   },
   {
     id: 3,
-    src: '/kids1.webp',
-    alt: 'Kids cloths and all',
-    title: 'Kids cloths Collection',
+    src: '/kids1.jpg',
+    alt: "Colorful Kids' Shirts",
+    title: 'Playful & Durable',
     subtitle:
-      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad.',
+      'Vibrant and soft shirts for kids, designed with fun patterns and stretchable fabric to keep up with their active adventures.',
   },
   {
     id: 4,
-    src: '/kids2.webp',
-    alt: 'random title generated',
-    title: 'random title generated',
+    src: '/kids2.jpg',
+    alt: "Kids' Traditional Panjabi Set",
+    title: 'Festive Little Ones',
     subtitle:
-      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit vitae nihil dolorem ad officiis molestias culpa, illo harum illum doloremque.',
+      'Adorable matching panjabi sets for children, combining traditional charm with comfortable fits for family celebrations and Eid festivities.',
   },
 ]
 

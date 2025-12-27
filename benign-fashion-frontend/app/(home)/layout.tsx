@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReactQueryProvider>
           <LayoutClientWrapper>
-            <main className="p-6">{children}</main>
+            <main className="px-3">{children}</main>
             <Toaster />
             <Footer />
           </LayoutClientWrapper>

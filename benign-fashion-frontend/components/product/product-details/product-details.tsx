@@ -137,7 +137,7 @@ export default function ProductDetails() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="lg:w-4/5 mx-auto py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {/* Product Gallery */}
           <div className="flex gap-4">

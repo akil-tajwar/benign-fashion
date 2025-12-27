@@ -86,11 +86,6 @@ export default function Home() {
     return category?.categoryType === 'kids'
   })
 
-  const openProductModal = (product: GetProductType) => {
-    setSelectedProduct(product)
-    setIsProductModalOpen(true)
-  }
-
   const handleViewAll = (products: GetProductType[]) => {
     setCategoryLimits((prev) => ({
       ...prev,
@@ -112,12 +107,12 @@ export default function Home() {
 
       {/* Search Results */}
       {searchQuery && (
-        <section className="container mx-auto px-3 sm:px-4 py-8">
+        <section className="px-3 sm:px-4 py-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Search Results for &quot;{searchQuery}&quot; (
             {filteredProducts.length} items)
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.product.id}
@@ -130,7 +125,7 @@ export default function Home() {
 
       {/* Product Collections */}
       {!searchQuery && (
-        <main className="container mx-auto px-3 sm:px-4 py-8 md:py-12">
+        <main className="container mx-auto sm:px-3 py-8 md:py-12">
           {menProducts.length > 0 && (
             <section
               ref={(el) => {
@@ -157,7 +152,7 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {menProducts
                   .slice(0, categoryLimits['men'] || 4)
                   .map((product) => (
@@ -196,7 +191,7 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {kidsProducts
                   .slice(0, categoryLimits['kids'] || 4)
                   .map((product) => (

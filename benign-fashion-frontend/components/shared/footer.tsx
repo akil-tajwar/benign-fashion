@@ -8,7 +8,7 @@ import Link from 'next/link'
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-100 mt-12 sm:mt-16">
-      <div className="w-4/5 mx-auto px-4 py-8 sm:py-12">
+      <div className="lg:w-4/5 mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Column 1 */}
           <div>
