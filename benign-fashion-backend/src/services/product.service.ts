@@ -89,6 +89,7 @@ export const getProducts = async (subCategoryId?: number) => {
       subCategoryId: productsModel.subCategoryId,
       subCategoryName: subcat.name,
       subCategoryType: subcat.categoryType, // ✅ optional (only if you want)
+      sizeType: subcat.sizeType, // ✅ optional (only if you want)
     })
     .from(productsModel)
     .innerJoin(
@@ -128,6 +129,7 @@ export const getProducts = async (subCategoryId?: number) => {
 
       subCategoryName: p.subCategoryName,
       subCategoryType: p.subCategoryType,
+      sizeType: p.sizeType,
     },
 
     photoUrls: photos
@@ -166,6 +168,7 @@ export const getProductById = async (id: number) => {
 
       subCategoryId: productsModel.subCategoryId,
       subCategoryName: subcat.name,
+      sizeType: subcat.sizeType,
     })
     .from(productsModel)
     .innerJoin(
@@ -201,6 +204,7 @@ export const getProductById = async (id: number) => {
       createdAt: product.createdAt,
       categoryName: product.categoryName,
       subCategoryName: product.subCategoryName,
+      sizeType: product.sizeType,
     },
 
     photoUrls: photos.map((photo) => ({

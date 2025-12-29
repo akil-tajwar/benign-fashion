@@ -89,6 +89,7 @@ const Categories = () => {
     categoryType: 'men',
     isCategoryHead: false,
     categoryHeadId: null,
+    sizeType: 'men panjabi',
   })
 
   // State for table data
@@ -140,6 +141,7 @@ const Categories = () => {
       categoryType: 'men',
       isCategoryHead: false,
       categoryHeadId: null,
+      sizeType: 'men panjabi',
     })
     setEditingCategory(null)
     setIsPopupOpen(false)
@@ -152,6 +154,7 @@ const Categories = () => {
       categoryType: category.categoryType,
       isCategoryHead: category.isCategoryHead,
       categoryHeadId: category.categoryHeadId,
+      sizeType: category.sizeType,
     })
     setIsPopupOpen(true)
   }, [])
@@ -210,6 +213,7 @@ const Categories = () => {
           categoryType: formData.categoryType,
           isCategoryHead: formData.isCategoryHead,
           categoryHeadId: formData.categoryHeadId,
+          sizeType: formData.sizeType,
         }
 
         if (editingCategory) {
@@ -265,6 +269,7 @@ const Categories = () => {
               name: '',
               categoryType: 'men',
               isCategoryHead: false,
+              sizeType: "men panjabi",
             })
             setIsPopupOpen(true)
           }}
@@ -456,21 +461,30 @@ const Categories = () => {
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="isCategoryHead"
-                name="isCategoryHead"
-                checked={formData.isCategoryHead}
-                onCheckedChange={(checked) =>
+            <div className="space-y-2">
+              <Label htmlFor="sizeType">Size Type</Label>
+              <Select
+                name="sizeType"
+                value={formData.sizeType.toString()}
+                onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    isCategoryHead: checked as boolean,
+                    sizeType: value as "men panjabi" | "men payjama" | "men formal shirt" | "men casual shirt" | "kids panjabi",
                   }))
                 }
-              />
-              <Label htmlFor="isCategoryHead" className="cursor-pointer">
-                Is Category Head
-              </Label>
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an asset" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="men panjabi">Men Panjabi</SelectItem>
+                  <SelectItem value="men payjama">Men Payjama</SelectItem>
+                  <SelectItem value="men formal shirt">Men Formal Shirt</SelectItem>
+                  <SelectItem value="men casual shirt">Men Causal Shirt</SelectItem>
+                  <SelectItem value="kids panjabi">Kids Panjabi</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {!formData.isCategoryHead && (
@@ -504,6 +518,23 @@ const Categories = () => {
                 />
               </div>
             )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="isCategoryHead"
+              name="isCategoryHead"
+              checked={formData.isCategoryHead}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isCategoryHead: checked as boolean,
+                }))
+              }
+            />
+            <Label htmlFor="isCategoryHead" className="cursor-pointer">
+              Is Category Head
+            </Label>
           </div>
 
           <DialogFooter>

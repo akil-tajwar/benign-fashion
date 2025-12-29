@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import {
   Search,
   User,
@@ -67,6 +67,7 @@ export default function Navbar({
   )
 
   const router = useRouter()
+  const pathname = usePathname()
   const { cartItems } = useCart()
 
   useEffect(() => {
@@ -102,6 +103,17 @@ export default function Navbar({
     onCategoryClick(categoryId)
     router.push(categoryPath)
   }
+
+  const handleCloseSearch = () => {
+    setShowSearchOverlay(false)
+    setSearchQuery('') // Reset search query
+  }
+
+  // Check if search should be hidden based on pathname
+  const shouldHideSearch =
+    pathname.includes('product-details') ||
+    pathname.includes('thank-you') ||
+    pathname.includes('checkout')
 
   return (
     <>
@@ -219,14 +231,16 @@ export default function Navbar({
 
             {/* RIGHT SECTION */}
             <div className="flex items-center gap-4">
-              {/* SEARCH ICON */}
-              <button
-                onClick={() => setShowSearchOverlay(true)}
-                className="text-gray-600 hover:text-blue-600"
-                aria-label="Search"
-              >
-                <Search className="w-7 h-7" />
-              </button>
+              {/* SEARCH ICON - Hidden on product-details, thank-you, checkout pages */}
+              {!shouldHideSearch && (
+                <button
+                  onClick={() => setShowSearchOverlay(true)}
+                  className="text-gray-600 hover:text-blue-600"
+                  aria-label="Search"
+                >
+                  <Search className="w-7 h-7" />
+                </button>
+              )}
 
               {/* CART */}
               <button
@@ -319,23 +333,31 @@ export default function Navbar({
         <div className="p-4">
           {/* Men Category */}
           <div className="mb-2">
-            <div
-              onMouseEnter={() => setExpandedAccordion('men')}
-              onMouseLeave={() => setExpandedAccordion(null)}
-              className="relative"
-            >
-              <Link
-                href="/men-products"
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
-              >
-                <span className="font-medium text-gray-700">Men</span>
-                <ChevronRight
-                  className={`w-5 h-5 transition-transform ${
-                    expandedAccordion === 'men' ? 'rotate-90' : ''
-                  }`}
-                />
-              </Link>
+            <div className="relative">
+              <div className="flex items-center">
+                <Link
+                  href="/men-products"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="flex-1 p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+                >
+                  <span className="font-medium text-gray-700">Men</span>
+                </Link>
+                <button
+                  onClick={() =>
+                    setExpandedAccordion(
+                      expandedAccordion === 'men' ? null : 'men'
+                    )
+                  }
+                  className="p-3 hover:bg-gray-100 rounded-lg"
+                  aria-label="Toggle men submenu"
+                >
+                  <ChevronRight
+                    className={`w-5 h-5 transition-transform ${
+                      expandedAccordion === 'men' ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+              </div>
 
               {/* Men Accordion Content */}
               {expandedAccordion === 'men' && (
@@ -386,23 +408,31 @@ export default function Navbar({
 
           {/* Kids Category */}
           <div className="mb-2">
-            <div
-              onMouseEnter={() => setExpandedAccordion('kids')}
-              onMouseLeave={() => setExpandedAccordion(null)}
-              className="relative"
-            >
-              <Link
-                href="/kids-products"
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
-              >
-                <span className="font-medium text-gray-700">Kids</span>
-                <ChevronRight
-                  className={`w-5 h-5 transition-transform ${
-                    expandedAccordion === 'kids' ? 'rotate-90' : ''
-                  }`}
-                />
-              </Link>
+            <div className="relative">
+              <div className="flex items-center">
+                <Link
+                  href="/kids-products"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="flex-1 p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+                >
+                  <span className="font-medium text-gray-700">Kids</span>
+                </Link>
+                <button
+                  onClick={() =>
+                    setExpandedAccordion(
+                      expandedAccordion === 'kids' ? null : 'kids'
+                    )
+                  }
+                  className="p-3 hover:bg-gray-100 rounded-lg"
+                  aria-label="Toggle kids submenu"
+                >
+                  <ChevronRight
+                    className={`w-5 h-5 transition-transform ${
+                      expandedAccordion === 'kids' ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+              </div>
 
               {/* Kids Accordion Content */}
               {expandedAccordion === 'kids' && (
@@ -467,10 +497,7 @@ export default function Navbar({
         <div className="fixed inset-0 bg-white z-50 h-fit animate-slideDownFast p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-semibold">Search Products</h2>
-            <button
-              onClick={() => setShowSearchOverlay(false)}
-              aria-label="Close search"
-            >
+            <button onClick={handleCloseSearch} aria-label="Close search">
               <X className="w-6 h-6 text-gray-700" />
             </button>
           </div>

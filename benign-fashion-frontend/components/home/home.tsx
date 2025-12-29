@@ -103,21 +103,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <HeroSlider />
+      {/* Hero Slider - Hidden when searching */}
+      {!searchQuery && <HeroSlider />}
 
       {/* Search Results */}
       {searchQuery && (
-        <section className="px-3 sm:px-4 py-8">
+        <section className="container mx-auto sm:px-3 pt-24 pb-8 md:pt-28 md:pb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Search Results for &quot;{searchQuery}&quot; (
             {filteredProducts.length} items)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.product.id}
-                product={product}
-              />
+              <ProductCard key={product.product.id} product={product} />
             ))}
           </div>
         </section>
@@ -156,10 +154,7 @@ export default function Home() {
                 {menProducts
                   .slice(0, categoryLimits['men'] || 4)
                   .map((product) => (
-                    <ProductCard
-                      key={product.product.id}
-                      product={product}
-                    />
+                    <ProductCard key={product.product.id} product={product} />
                   ))}
               </div>
             </section>
@@ -195,10 +190,7 @@ export default function Home() {
                 {kidsProducts
                   .slice(0, categoryLimits['kids'] || 4)
                   .map((product) => (
-                    <ProductCard
-                      key={product.product.id}
-                      product={product}
-                    />
+                    <ProductCard key={product.product.id} product={product} />
                   ))}
               </div>
             </section>

@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       'via.placeholder.com', 
       'images.unsplash.com',
       'localhost',         // Add this for local backend images
-      'anukabd.com',
+      'benignfashion.com',
     ],
   },
 }

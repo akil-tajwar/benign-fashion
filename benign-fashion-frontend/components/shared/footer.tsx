@@ -4,8 +4,11 @@ import { FaFacebookF, FaWhatsapp, FaTiktok, FaInstagram } from 'react-icons/fa'
 import { FaThreads } from 'react-icons/fa6'
 import { CiYoutube } from 'react-icons/ci'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function Footer() {
+  const phone = '+8801703133275'
+  const [copied, setCopied] = useState(false)
   return (
     <footer className="bg-gray-900 text-gray-100 mt-12 sm:mt-16">
       <div className="lg:w-4/5 mx-auto px-4 py-8 sm:py-12">
@@ -109,7 +112,54 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>Email: benignfashion@gmail.com</li>
-              <li>Phone: +8801703133275</li>
+              <li className="flex items-center gap-2">
+                Phone: <span>{phone}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(phone)
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }}
+                  className={`
+      relative overflow-hidden text-xs px-1 rounded-md font-medium
+      w-[75px] flex items-center justify-center
+      transition-all duration-500 ease-out
+      ${
+        copied
+          ? 'bg-gradient-to-r from-green-500 via-emerald-400 to-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.8),0_0_40px_rgba(34,197,94,0.4)] border-2 border-green-300'
+          : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-600 hover:border-gray-500 hover:shadow-lg'
+      }
+    `}
+                >
+                  <span
+                    className={`relative z-10 flex items-center gap-1 ${copied ? 'animate-bounce' : ''}`}
+                  >
+                    {copied ? (
+                      <>
+                        <svg
+                          className="w-3 h-3"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Copied!
+                      </>
+                    ) : (
+                      'Copy'
+                    )}
+                  </span>
+                  {copied && (
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-[shimmer_0.5s_ease-in-out]" />
+                  )}
+                </button>
+              </li>
+
               <li>
                 Outlet-1: Shop no #423,Level 4,Finlay South City, Bahaddarhat
                 Circle,Chattagram.

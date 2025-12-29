@@ -57,7 +57,7 @@ export const createUser = async (userData: NewUser) => {
     }
 
     // Check if email already exists
-    const existingEmail = await findUserByEmail(userData.email);
+    const existingEmail = await findUserByEmail(userData.email as 'string | null | undefined');
     if (existingEmail) {
       throw BadRequestError("Email already registered, please try another");
     }

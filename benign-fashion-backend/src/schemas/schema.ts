@@ -68,6 +68,13 @@ export const categoriesModel = mysqlTable("categories", {
   categoryType: mysqlEnum("category_type", ["men", "kids"]),
   isCategoryHead: boolean("is_category_head").notNull(),
   categoryHeadId: int("category_head_id"),
+  sizeType: mysqlEnum("size_type", [
+    "men panjabi",
+    "men payjama",
+    "men formal shirt",
+    "men casual shirt",
+    "kids panjabi",
+  ]),
 });
 
 // ================= PRODUCTS =================
@@ -102,16 +109,20 @@ export const photosModel = mysqlTable("photos", {
 // ================= ORDERS =================
 export const ordersMasterModel = mysqlTable("orders_master", {
   id: int("id").primaryKey().autoincrement(),
-  userId: int("user_id").references(() => userModel.userId, {
-    onDelete: "cascade",
-  }).notNull(),
+  userId: int("user_id")
+    .references(() => userModel.userId, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   fullName: varchar("full_name", { length: 255 }).notNull(),
   division: varchar("division", { length: 15 }).notNull(),
   district: varchar("district", { length: 15 }).notNull(),
   address: varchar("address", { length: 100 }).notNull(),
   phone: varchar("phone", { length: 14 }).notNull(),
   email: varchar("email", { length: 50 }),
-  status: mysqlEnum("status", ["pending", "confirmed", "delivered"]).default("pending"),
+  status: mysqlEnum("status", ["pending", "confirmed", "delivered"]).default(
+    "pending"
+  ),
   method: mysqlEnum("method", ["bkash", "nagad", "rocket"]).notNull(),
   billingPhone: varchar("billing_phone", { length: 14 }).notNull(),
   transactionId: varchar("transaction_id", { length: 255 }).notNull(),

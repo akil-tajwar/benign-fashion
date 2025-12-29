@@ -75,6 +75,13 @@ export const categorySchema = z.object({
   categoryType: z.enum(['men', 'kids']),
   isCategoryHead: z.boolean().default(false),
   categoryHeadId: z.number().optional().nullable(),
+  sizeType: z.enum([
+    'men panjabi',
+    'men payjama',
+    'men formal shirt',
+    'men casual shirt',
+    'kids panjabi',
+  ]),
 })
 
 export type CreateCategoryType = z.infer<typeof categorySchema>
@@ -97,6 +104,7 @@ export const productSchema = z.object({
     categoryName: z.string().optional(),
     subCategoryName: z.string().optional(),
     categoryType: z.string().optional(),
+    sizeType: z.string().optional(),
   }),
 
   photoUrls: z.array(
@@ -157,5 +165,5 @@ export const userSchema = z.object({
   address: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
-});
+})
 export type GetUsersType = z.infer<typeof userSchema>
