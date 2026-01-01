@@ -1,4 +1,8 @@
 import { z } from 'zod'
+// Declare process shape for environments where Node types are not present
+declare const process:
+  | { env?: { NEXT_PUBLIC_API_BASE_URL?: string } }
+  | undefined
 
 // Type for API response
 type ApiResponse<T> = {
@@ -26,7 +30,15 @@ const handleLogout = () => {
   //window.location.href = '/login'
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+// Normalize API base URL and provide sensible defaults for server/client contexts
+const rawBase =
+  (typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_API_BASE_URL : undefined) ||
+  (typeof window !== 'undefined'
+    ? `${window.location.origin}/api`
+    : 'http://127.0.0.1:4000/api')
+
+const API_BASE_URL = rawBase.replace(/\/+$/, '')
+const buildUrl = (u: string) => `${API_BASE_URL}/${u.replace(/^\/+/, '')}`
 
 // Main fetch utility function
 export async function fetchApi<T>({
@@ -42,7 +54,7 @@ export async function fetchApi<T>({
   console.log('fetchapi token', headers.Authorization)
 
   const response = await fetch(
-    `${API_BASE_URL}/${url}`,
+    buildUrl(url),
     {
       method,
       headers: {
@@ -52,7 +64,7 @@ export async function fetchApi<T>({
       body: body ? JSON.stringify(body) : undefined,
     }
   )
-console.log(`${API_BASE_URL}/${url}`)
+console.log(buildUrl(url))
   // Handle network errors
   if (!response) {
     return {
@@ -134,14 +146,14 @@ export async function fetchApiWithFile<T>({
   headers?: HeadersInit
   body?: any
 }): Promise<T> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL 
+  const baseUrl = API_BASE_URL
   const isFormData = body instanceof FormData
 
   const finalHeaders = isFormData
     ? headers // Do NOT set Content-Type for FormData
     : { "Content-Type": "application/json", ...headers }
 
-  const response = await fetch(`${baseUrl}/${url}`, {
+  const response = await fetch(buildUrl(url), {
     method,
     headers: finalHeaders,
     body: isFormData ? body : JSON.stringify(body),
