@@ -13,9 +13,24 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend origin
-    // origin: "https://anuka-organic.vercel.app/", // frontend origin
-    credentials: true, // allow cookies/auth headers
+    credentials: true,
+    origin: (
+      origin: string | undefined,
+      cb: (err: Error | null, allow?: boolean) => void
+    ) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://benignfashion.com",
+        "https://www.benignfashion.com",
+      ];
+
+      // Allow non-browser requests (no origin) and whitelisted domains
+      if (!origin || allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
+
+      return cb(new Error("Not allowed by CORS"));
+    },
   })
 );
 app.use(helmet());
