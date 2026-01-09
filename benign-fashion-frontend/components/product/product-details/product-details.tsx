@@ -9,10 +9,21 @@ import { fetchProductById, fetchProducts } from '@/utils/api'
 import { useToast } from '@/hooks/use-toast'
 import { Minus, Plus } from 'lucide-react'
 import Image from 'next/image'
-import size from '../../../public/formal-shirt-size.jpeg'
+import menCasualShirt from '../../../public/men-casual-shirt-size.jpg'
+import menFormalShirt from '../../../public/men-formal-shirt-size.jpeg'
+import menPanjabi from '../../../public/men-panjabi-size.jpeg'
+import menPayjama from '../../../public/men-payjama-size.jpg'
+import kidsPanjabi from '../../../public/kids-panjabi-size.jpg'
 import { useCart } from '@/hooks/use-cart'
 import { Button } from '@/components/ui/button'
 import ProductCard from '../product-card'
+
+type SizeType =
+  | 'men panjabi'
+  | 'men payjama'
+  | 'men formal shirt'
+  | 'men casual shirt'
+  | 'kids panjabi'
 
 export default function ProductDetails() {
   useInitializeUser()
@@ -308,7 +319,7 @@ export default function ProductDetails() {
                   onClick={handleAddToCart}
                   disabled={!selectedSize || !product.product.isAvailable}
                 >
-                   {product.product.isAvailable? 'ADD TO CART' : 'Out of Stock'}
+                  {product.product.isAvailable ? 'ADD TO CART' : 'Out of Stock'}
                 </Button>
               </div>
 
@@ -321,8 +332,15 @@ export default function ProductDetails() {
               <div className="mt-6">
                 <h3 className="font-semibold mb-2">Size Chart</h3>
                 <Image
-                  src={size}
-                  alt="Size chart"
+                  src={
+                    (product.product.sizeType === 'men panjabi' && menPanjabi) ||
+                    (product.product.sizeType === 'men payjama' && menPayjama) ||
+                    (product.product.sizeType === 'men formal shirt' && menFormalShirt) ||
+                    (product.product.sizeType === 'men casual shirt' && menCasualShirt) ||
+                    (product.product.sizeType === 'kids panjabi' && kidsPanjabi) ||
+                    '/placeholder.svg'
+                  }
+                  alt={`${product.product.sizeType} size chart`}
                   className="w-full h-full object-cover rounded border"
                   width={1280}
                   height={1280}

@@ -10,8 +10,14 @@ const inter = Inter({ subsets: ['latin'] })
   
 export const metadata: Metadata = {
   title: 'Benign Fashion',
-  description: 'Created with Next.js, TypeScript, Tailwind CSS, and shadcn/ui',
+  description: 'Premium fashion with modern design and quality fabrics.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 }
+
 
 export default function RootLayout({
   children,

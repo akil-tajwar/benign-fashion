@@ -248,9 +248,12 @@ export default function Navbar({
                 className="text-gray-600 hover:text-blue-600 relative"
                 aria-label="Shopping cart"
               >
-                <p className="absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0">
-                  {cartItems.length}
-                </p>
+                {cartItems.length > 0 && (
+                  <p className="absolute text-xs bg-red-600 rounded-full px-1 text-white right-0 top-0">
+                    {cartItems.length}
+                  </p>
+                )}
+
                 <ShoppingCart className="w-7 h-7" />
               </button>
 
@@ -335,20 +338,29 @@ export default function Navbar({
           <div className="mb-2">
             <div className="relative">
               <div className="flex items-center">
-                <Link
-                  href="/men-products"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="flex-1 p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+                <div
+                  className="flex-1 p-3 cursor-pointer"
+                  onClick={() =>
+                    setExpandedAccordion(
+                      expandedAccordion === 'men' ? null : 'men'
+                    )
+                  }
                 >
-                  <span className="font-medium text-gray-700">Men</span>
-                </Link>
+                  <Link
+                    href="/men-products"
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="font-medium text-gray-700 hover:text-blue-600"
+                  >
+                    Men
+                  </Link>
+                </div>
                 <button
                   onClick={() =>
                     setExpandedAccordion(
                       expandedAccordion === 'men' ? null : 'men'
                     )
                   }
-                  className="p-3 hover:bg-gray-100 rounded-lg"
+                  className="p-3"
                   aria-label="Toggle men submenu"
                 >
                   <ChevronRight
@@ -391,7 +403,7 @@ export default function Navbar({
                                       `/category-products/${subCat.id}`
                                     )
                                   }
-                                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded"
+                                  className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-blue-600"
                                 >
                                   {subCat.name}
                                 </button>
@@ -410,20 +422,29 @@ export default function Navbar({
           <div className="mb-2">
             <div className="relative">
               <div className="flex items-center">
-                <Link
-                  href="/kids-products"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="flex-1 p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+                <div
+                  onClick={() =>
+                    setExpandedAccordion(
+                      expandedAccordion === 'kids' ? null : 'kids'
+                    )
+                  }
+                  className="flex-1 p-3 cursor-pointer"
                 >
-                  <span className="font-medium text-gray-700">Kids</span>
-                </Link>
+                  <Link
+                    href="/kids-products"
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="font-medium text-gray-700 hover:text-blue-600"
+                  >
+                    Kids
+                  </Link>
+                </div>
                 <button
                   onClick={() =>
                     setExpandedAccordion(
                       expandedAccordion === 'kids' ? null : 'kids'
                     )
                   }
-                  className="p-3 hover:bg-gray-100 rounded-lg"
+                  className="p-3"
                   aria-label="Toggle kids submenu"
                 >
                   <ChevronRight
@@ -482,13 +503,15 @@ export default function Navbar({
           </div>
 
           {/* Flash Sale - No Accordion */}
-          <Link
-            href="/flash-sale-products"
-            onClick={() => setIsSidebarOpen(false)}
-            className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
-          >
-            <span className="font-medium text-gray-700">Flash Sale</span>
-          </Link>
+          <div className="flex items-center justify-between p-3 cursor-pointer">
+            <Link
+              href="/flash-sale-products"
+              onClick={() => setIsSidebarOpen(false)}
+              className="font-medium text-gray-700 hover:text-blue-600"
+            >
+              Flash Sale
+            </Link>
+          </div>
         </div>
       </div>
 

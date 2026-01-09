@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 const sliderImages = [
   {
     id: 1,
-    src: '/men1.jpg',
+    src: '/men1.JPG',
     alt: "Elegant Men's Formal Shirt",
     title: 'Premium Cotton Collection',
     subtitle:
@@ -15,7 +15,7 @@ const sliderImages = [
   },
   {
     id: 2,
-    src: '/men2.jpg',
+    src: '/men2.JPG',
     alt: "Men's Embroidered Panjabi",
     title: 'Traditional Elegance',
     subtitle:
@@ -23,7 +23,7 @@ const sliderImages = [
   },
   {
     id: 3,
-    src: '/kids1.jpg',
+    src: '/kids1.JPG',
     alt: "Colorful Kids' Shirts",
     title: 'Playful & Durable',
     subtitle:
@@ -31,7 +31,7 @@ const sliderImages = [
   },
   {
     id: 4,
-    src: '/kids2.jpg',
+    src: '/kids2.JPG',
     alt: "Kids' Traditional Panjabi Set",
     title: 'Festive Little Ones',
     subtitle:

@@ -10,7 +10,7 @@ import { upload } from "../middlewares/upload";
 
 const router = Router();
 
-router.post("/create", upload.array("photoUrls", 10), createProductController);
+router.post("/create", upload.array("photoFiles", 10), createProductController);
 router.get("/get", getProductsController);
 router.get("/get/:id", getProductByIdController);
 router.put("/update/:id", upload.array("photoFiles", 10), updateProductController);

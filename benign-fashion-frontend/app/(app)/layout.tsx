@@ -5,13 +5,17 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/toaster'
 import { ReactQueryProvider } from '@/provider/react-query-provider'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar/dashboard-sidebar'
-import Navbar from '@/components/shared/navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'cloth store',
-  description: 'Created with Next.js, TypeScript, Tailwind CSS, and shadcn/ui',
+  title: 'Benign Fashion',
+  description: 'Premium fashion with modern design and quality fabrics.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export default function RootLayout({
@@ -23,7 +27,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
-          {/* <Navbar /> */}
           <SidebarProvider>
             <DashboardSidebar />
             <SidebarInset>

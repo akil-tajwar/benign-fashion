@@ -49,6 +49,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { cartItems, clearCart } = useCart()
+  console.log('🚀 ~ CheckoutPage ~ cartItems:', cartItems)
 
   // Fetch user info and populate form when userData.userId is available
   useEffect(() => {
@@ -220,14 +221,6 @@ export default function CheckoutPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[82vh]">
-        <Loader />
-      </div>
-    )
   }
 
   return (
@@ -464,7 +457,9 @@ export default function CheckoutPage() {
                     <li>Select your payment method below</li>
                     <li>
                       <span className="">
-                        <span>Scan the QR code or use the number (personal): </span>
+                        <span>
+                          Scan the QR code or use the number (personal):{' '}
+                        </span>
                         <span className="font-medium">
                           {formData.method === 'bkash' && (
                             <span className="text-pink-500 font-semibold">
@@ -689,7 +684,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between items-center mt-3">
                       <p className="font-semibold text-sm">
-                        ৳{Math.round(item.price * item.quantity)}
+                        {`৳${Math.round(item.price)}x${item.quantity} = ৳${Math.round(item.price * item.quantity)}`}
                       </p>
                     </div>
                   </div>
