@@ -13,11 +13,19 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend origin
-    // origin: "https://anuka-organic.vercel.app/", // frontend origin
-    credentials: true, // allow cookies/auth headers
+    credentials: true,
+    origin: (origin, cb) => {
+      const allowed = [
+        'http://localhost:3000',
+        'https://benignfashion.com',
+        'https://www.benignfashion.com',
+      ]
+      if (!origin || allowed.includes(origin)) return cb(null, true)
+      return cb(new Error('Not allowed by CORS'))
+    },
   })
-);
+)
+
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
