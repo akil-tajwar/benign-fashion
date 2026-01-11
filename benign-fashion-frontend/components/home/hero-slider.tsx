@@ -15,7 +15,7 @@ const sliderImages = [
   },
   {
     id: 2,
-    src: '/men2.JPG',
+    src: '/men2.jpg',
     alt: "Men's Embroidered Panjabi",
     title: 'Traditional Elegance',
     subtitle:

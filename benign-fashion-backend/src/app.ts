@@ -11,34 +11,28 @@ dotenv.config();
 const app = express();
 
 // Middleware
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://benignfashion.com",
-  "https://www.benignfashion.com",
-];
-
 app.use(
   cors({
     credentials: true,
-    origin: (origin, cb) => {
-      // Allow server-to-server or same-origin requests
-      if (!origin) return cb(null, true);
+    origin: (
+      origin: string | undefined,
+      cb: (err: Error | null, allow?: boolean) => void
+    ) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://benignfashion.com",
+        "https://www.benignfashion.com",
+      ];
 
-      if (allowedOrigins.includes(origin)) {
+      // Allow non-browser requests (no origin) and whitelisted domains
+      if (!origin || allowedOrigins.includes(origin)) {
         return cb(null, true);
       }
 
-      // ❗ DO NOT throw error
-      return cb(null, false);
+      return cb(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// Explicitly handle preflight
-app.options("*", cors());
-
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

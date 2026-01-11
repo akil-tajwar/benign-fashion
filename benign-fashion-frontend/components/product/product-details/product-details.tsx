@@ -370,7 +370,7 @@ export default function ProductDetails() {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Note:</h3>
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm">
                     The color of the product may look slightly different because
                     of lighting and your device&apos;s screen settings.
                   </p>
