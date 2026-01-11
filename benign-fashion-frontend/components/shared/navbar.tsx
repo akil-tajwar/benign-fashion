@@ -135,7 +135,7 @@ export default function Navbar({
               {/* Logo */}
               <Link href="/" className="">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo.jpeg"
                   alt="Logo"
                   width={50}
                   height={50}
